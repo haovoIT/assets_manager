@@ -1,5 +1,7 @@
 import 'package:assets_manager/bloc/login_bloc.dart';
 import 'package:assets_manager/component/app_colors.dart';
+import 'package:assets_manager/component/app_string.dart';
+import 'package:assets_manager/component/domain_service.dart';
 import 'package:assets_manager/component/global_styles.dart';
 import 'package:assets_manager/global_widget/text_field_login.dart';
 import 'package:flutter/cupertino.dart';
@@ -61,7 +63,7 @@ class Alert {
       builder: (context) {
         return AlertDialog(
           title: const Text(
-            'Quên Mật Khẩu',
+            LoginString.FORGOT_PASSWORD,
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
@@ -70,15 +72,18 @@ class Alert {
             child: Container(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text("Vui lòng nhập email bạn đã đăng kí!"),
+                  Text(
+                    LoginString.CONTENT_FORGOT_PASS,
+                    textAlign: TextAlign.center,
+                  ),
                   GlobalStyles.sizedBoxHeight_10,
                   StreamBuilder(
                       stream: loginBloc?.emailsEdit,
                       builder: (context, snapshot) => TextFieldLogin(
-                            hintText: "quanlytaisan2023@gmail.com",
-                            labelText: "Email",
+                            hintText: LoginString.HINT_TEXT_EMAIL,
+                            labelText: LoginString.LABEL_TEXT_EMAIL,
                             errorText: snapshot.error != null
                                 ? snapshot.error.toString()
                                 : "",
@@ -92,7 +97,10 @@ class Alert {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Huỷ'),
+              child: Text(
+                CommonString.CANCEL,
+                style: TextStyle(fontSize: 18),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -101,32 +109,30 @@ class Alert {
               initialData: false,
               stream: loginBloc?.forgotPasswordEdit,
               builder: (context, snapshot) => Container(
-                width: 200,
+                width: 100,
                 height: 60,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
-                  child: ElevatedButton(
-                    child: Text(
-                      "Tiếp Tục",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.red),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: EdgeInsets.fromLTRB(0, 12, 0, 12),
-                      textStyle: TextStyle(
-                        fontSize: 18,
+                child: ElevatedButton(
+                  child: Text(
+                    CommonString.CONTINUE,
+                    style: TextStyle(
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onPressed: () {
-                      loginBloc?.forgotPasswordEditChanged.add('Reset');
-                      Navigator.of(context).pop();
-                    },
+                        fontSize: 18,
+                        color: Colors.white),
                   ),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    padding: EdgeInsets.fromLTRB(0, 12, 0, 12),
+                    textStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () {
+                    loginBloc?.forgotPasswordEditChanged
+                        .add(DomainProvider.RESET);
+                    Navigator.of(context).pop();
+                  },
                 ),
               ),
             )

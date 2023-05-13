@@ -74,9 +74,17 @@ class AuthenticationServer implements AuthenticationApi {
               buttonText: CommonString.OK,
               context: context));
     } catch (e) {
+      String mas = "";
+      if (e.toString().contains("firebase_auth/unknown")) {
+        mas = CommonString.ERROR_UNKNOWN;
+      } else if (e.toString().contains("firebase_auth/user-not-found")) {
+        mas = CommonString.ERROR_USER_NOT_FOUND;
+      } else {
+        mas = CommonString.ERROR_MESSAGE;
+      }
       Alert.showError(
           title: CommonString.ERROR,
-          message: CommonString.ERROR_MESSAGE,
+          message: mas,
           buttonText: CommonString.CANCEL,
           context: context);
     }

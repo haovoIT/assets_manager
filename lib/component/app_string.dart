@@ -1,9 +1,11 @@
 abstract class CommonString {
   static const String ERROR = "Lỗi!";
+  static const String CONTINUE = "Tiếp Tục";
   static const String ERROR_MESSAGE = "Có lỗi! Vui lòng thử lại sau.";
   static const String ERROR_USER_NOT_FOUND =
       "Tài khoản không tồn tại trên hệ thống hoặc đã bị xóa.";
   static const String ERROR_WRONG_PASSWORD = "Mật khẩu không hợp lệ.";
+  static const String ERROR_UNKNOWN = "Địa chỉ Email không được trống.";
   static const String CANCEL = "Hủy";
   static const String OK = "Chấp nhận";
   static const String SUCCESS = "Thành công";
@@ -19,8 +21,6 @@ abstract class SplashString {
   static const String WELCOME = "Chào mừng bạn đến với ...";
   static const String START = "Bắt đầu trải nghiệm >>>";
   static const String HAPPY = "Chúc bạn trải nghiệm vui vẻ !!!";
-  static const String ERROR_MESSAGE = "Error! Please try again later";
-  static const String CANCEL = "Cancel";
 }
 
 abstract class LoginString {
@@ -36,7 +36,9 @@ abstract class LoginString {
   static const String LOADING = "Đang tải....";
   static const String FACE_ID = "Khuôn Mặt";
   static const String FINGER_PRINT = "Vân Tay";
-  static const String FORGOT_PASSWORD = "Quên mật khẩu";
+  static const String FORGOT_PASSWORD = "Quên Mật Khẩu";
+  static const String CONTENT_FORGOT_PASS =
+      "Vui lòng nhập thông tin chính xác đã cung cấp trước đó. Chúng tôi sẽ gửi 1 email đến địa chỉ email đã đăng ký để cung cấp đường dẫn đổi mật khẩu.\n";
 }
 
 abstract class AppString {

@@ -168,27 +168,21 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
                         Container(
                           height: 50,
                           width: double.infinity,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              SizedBox(),
-                              TextButton(
-                                child: Text(
-                                  LoginString.HAVE_ACCOUNT,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.black54,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Alert.showForgotPassword(context,
-                                      resetEmailController:
-                                          resetEmailController,
-                                      loginBloc: loginBloc);
-                                },
-                              )
-                            ],
+                          child: TextButton(
+                            child: Text(
+                              LoginString.HAVE_ACCOUNT,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black54,
+                                fontStyle: FontStyle.italic,
+                              ),
+                              textScaleFactor: 1.0,
+                            ),
+                            onPressed: () {
+                              Alert.showForgotPassword(context,
+                                  resetEmailController: resetEmailController,
+                                  loginBloc: loginBloc);
+                            },
                           ),
                         ),
                         GlobalStyles.sizedBoxHeight_100,
@@ -356,8 +350,7 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
                             LoginString.FACE_ID,
                             // textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Color(0xff63656A),
-                            ),
+                                color: Color(0xff63656A), fontSize: 18),
                             textScaleFactor: 1.0,
                           ),
                         ),
@@ -376,7 +369,7 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
                       },
                       child: Text(
                         LoginString.FORGOT_PASSWORD,
-                        style: TextStyle(color: AppColors.gray, fontSize: 14),
+                        style: TextStyle(color: AppColors.gray, fontSize: 18),
                         textAlign: TextAlign.end,
                         textScaleFactor: 1.0,
                       ),
@@ -405,7 +398,10 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
                             LoginString.FINGER_PRINT,
-                            style: TextStyle(color: Color(0xff63656A)),
+                            style: TextStyle(
+                              color: Color(0xff63656A),
+                              fontSize: 18,
+                            ),
                             textScaleFactor: 1.0,
                           ),
                         ),
@@ -424,7 +420,8 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
                       },
                       child: Text(
                         LoginString.FORGOT_PASSWORD,
-                        style: TextStyle(color: AppColors.gray, fontSize: 14),
+                        style: TextStyle(
+                            color: AppColors.lightBlack, fontSize: 18),
                         textScaleFactor: 1.0,
                         textAlign: TextAlign.end,
                       ),
