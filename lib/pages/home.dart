@@ -1,6 +1,8 @@
 import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
+import 'package:assets_manager/component/alert.dart';
+import 'package:assets_manager/component/app_string.dart';
 import 'package:assets_manager/pages/assetsPage.dart';
 import 'package:assets_manager/pages/departmentList.dart';
 import 'package:assets_manager/pages/departmentsPage.dart';
@@ -39,16 +41,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('QUẢN LÝ TÀI SẢN'),
+        title: Text(HomeString.TITLE),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-              onPressed: () async {
-                final signOut = await _signOut();
-                if (signOut) {
-                  _authenticationBloc?.logoutUser.add(true);
-                }
-              },
+              onPressed: () async => Alert.confirmLogout(context,
+                  authenticationBloc: _authenticationBloc),
               icon: Icon(
                 Icons.exit_to_app,
                 color: Colors.lightGreen.shade800,
@@ -78,16 +76,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           tabs: [
             Tab(
               icon: Icon(Icons.home_filled),
-              text: 'Tài sản',
+              text: HomeString.ASSET,
             ),
-            Tab(icon: Icon(Icons.web_asset_outlined), text: 'Phòng Ban'),
+            Tab(
+                icon: Icon(Icons.web_asset_outlined),
+                text: HomeString.DEPARTMENT),
             Tab(
               icon: Icon(Icons.assessment_outlined),
-              text: 'Khấu Hao',
+              text: HomeString.DEPRECIATION,
             ),
             Tab(
               icon: Icon(Icons.apps_sharp),
-              text: 'Thêm',
+              text: HomeString.UTILITIES,
             ),
           ],
           indicator: ShapeDecoration(
@@ -129,36 +129,5 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   void dispose() {
     super.dispose();
     _tabController.dispose();
-  }
-
-  Future<bool> _signOut() async {
-    return await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(
-              "Đăng xuất",
-              style: TextStyle(
-                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            content: Text('Bạn có chắc chắn muốn đăng xuất không?'),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  child: Text('Thoát')),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: Text(
-                    'Tiếp tục',
-                    style: TextStyle(color: Colors.red),
-                  ))
-            ],
-          );
-        });
   }
 }

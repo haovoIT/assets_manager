@@ -57,10 +57,10 @@ class AssetsEditBloc {
   Sink<String> get nuocSxEditChanged => _nuocSxController.sink;
   Stream<String> get nuocSxEdit => _nuocSxController.stream;
 
-  final StreamController<String> _NtsController =
+  final StreamController<String> _ntsController =
       StreamController<String>.broadcast();
-  Sink<String> get NtsEditChanged => _NtsController.sink;
-  Stream<String> get NtsEdit => _NtsController.stream;
+  Sink<String> get NtsEditChanged => _ntsController.sink;
+  Stream<String> get NtsEdit => _ntsController.stream;
 
   final StreamController<String> _ngayBDController =
       StreamController<String>.broadcast();
@@ -133,8 +133,8 @@ class AssetsEditBloc {
     _nuocSxController.stream.listen((nuocSx) {
       selectAsset.Nuoc_sx = nuocSx;
     });
-    _NtsController.stream.listen((Nts) {
-      selectAsset.Ten_nts = Nts;
+    _ntsController.stream.listen((nts) {
+      selectAsset.Ten_nts = nts;
     });
     _ngayBDController.stream.listen((ngayBD) {
       ngay_BD = ngayBD;
@@ -312,7 +312,7 @@ class AssetsEditBloc {
     _maPbController.close();
     _namSXController.close();
     _nuocSxController.close();
-    _NtsController.close();
+    _ntsController.close();
     _TinhTrangController.close();
     _nguyenGiaController.close();
     _ngayBDController.close();
