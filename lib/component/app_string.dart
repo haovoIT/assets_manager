@@ -41,7 +41,25 @@ abstract class LoginString {
       "Vui lòng nhập thông tin chính xác đã cung cấp trước đó. Chúng tôi sẽ gửi 1 email đến địa chỉ email đã đăng ký để cung cấp đường dẫn đổi mật khẩu.\n";
 }
 
+abstract class HomeString {
+  static const String TITLE = "QUẢN LÝ TÀI SẢN";
+  static const String ASSET = "Tài Sản";
+  static const String DEPARTMENT = "Phòng Ban";
+  static const String DEPRECIATION = "Khấu Hao";
+  static const String UTILITIES = "Thêm";
+}
+
+abstract class AssetString {
+  static const String TITLE = "QUẢN LÝ TÀI SẢN";
+  static const String ASSET = "Tài Sản";
+  static const String DEPARTMENT = "Phòng Ban";
+  static const String DEPRECIATION = "Khấu Hao";
+  static const String UTILITIES = "Thêm";
+}
+
 abstract class AppString {
+  static const String LOGOUT = "Đăng Xuất";
+  static const String CONTENT_LOGOUT = "Bạn có chắc chắn muốn đăng xuất không?";
   static const String EMPTY = "Vui lòng điền các trường thông tin bắt buộc";
   static const String EMPTY_EMAIL = "Vui lòng nhập email của bạn";
   static const String EMPTY_TEL = "Vui lòng nhập số điện thoại";

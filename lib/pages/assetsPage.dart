@@ -26,10 +26,10 @@ class AssetsPages extends StatelessWidget {
   const AssetsPages({Key? key, required this.flag}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final AuthenticationServer _authenticationserver =
+    final AuthenticationServer _authenticationServer =
         AuthenticationServer(context);
     final AuthenticationBloc _authenticationBloc =
-        AuthenticationBloc(_authenticationserver);
+        AuthenticationBloc(_authenticationServer);
     return AuthenticationBlocProvider(
       authenticationBloc: _authenticationBloc,
       child: StreamBuilder(
@@ -44,7 +44,7 @@ class AssetsPages extends StatelessWidget {
           } else if (snapshot.hasData) {
             return HomeBlocProvider(
               homeBloc: HomeBloc(
-                  DbFirestoreService(), DbLSSDService(), _authenticationserver),
+                  DbFirestoreService(), DbLSSDService(), _authenticationServer),
               uid: snapshot.data!,
               child: AssetsPage(
                 flag: flag,

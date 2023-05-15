@@ -12,7 +12,6 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
-import 'package:horizontal_data_table/refresh/hdt_refresh_controller.dart';
 import 'package:intl/intl.dart';
 
 class ThongKeThucTrang extends StatelessWidget {

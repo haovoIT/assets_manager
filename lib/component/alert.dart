@@ -1,3 +1,4 @@
+import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/login_bloc.dart';
 import 'package:assets_manager/component/app_colors.dart';
 import 'package:assets_manager/component/app_string.dart';
@@ -183,6 +184,39 @@ class Alert {
       ),
       barrierDismissible: false,
     );
+  }
+
+  static void confirmLogout(context,
+      {required AuthenticationBloc? authenticationBloc}) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(
+              AppString.LOGOUT,
+              style: TextStyle(
+                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            content: Text(AppString.CONTENT_LOGOUT),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: Text(CommonString.CANCEL)),
+              TextButton(
+                  onPressed: () {
+                    authenticationBloc?.logoutUser.add(true);
+                    Navigator.pop(context, true);
+                  },
+                  child: Text(
+                    CommonString.CONTINUE,
+                    style: TextStyle(color: Colors.red),
+                  ))
+            ],
+          );
+        });
   }
   //
   // static Future<dynamic> selectFile() async {
