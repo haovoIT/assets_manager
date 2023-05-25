@@ -3,12 +3,11 @@ import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
 import 'package:assets_manager/component/alert.dart';
 import 'package:assets_manager/component/app_string.dart';
-import 'package:assets_manager/pages/assetsPage.dart';
+import 'package:assets_manager/pages/assets_page.dart';
 import 'package:assets_manager/pages/departmentList.dart';
 import 'package:assets_manager/pages/departmentsPage.dart';
 import 'package:assets_manager/pages/leftDrawerWidget.dart';
 import 'package:assets_manager/pages/utilitys.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {

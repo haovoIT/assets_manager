@@ -1,33 +1,34 @@
 import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
-import 'package:assets_manager/bloc/sotheodoi_bloc.dart';
-import 'package:assets_manager/bloc/sotheodoi_bloc_provider.dart';
-import 'package:assets_manager/bloc/sotheodoi_edit_bloc.dart';
-import 'package:assets_manager/bloc/sotheodoi_edit_bloc_provider.dart';
+import 'package:assets_manager/bloc/diary_bloc.dart';
+import 'package:assets_manager/bloc/diary_bloc_provider.dart';
+import 'package:assets_manager/bloc/diary_edit_bloc.dart';
+import 'package:assets_manager/bloc/diary_edit_bloc_provider.dart';
 import 'package:assets_manager/bloc/thanhly_edit_bloc.dart';
 import 'package:assets_manager/bloc/thanhly_edit_bloc_provider.dart';
 import 'package:assets_manager/inPDF/inPDF_ThongTinKhauHao.dart';
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/sotheodoi.dart';
-import 'package:assets_manager/models/taisan.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/models/diary_model.dart';
 import 'package:assets_manager/models/thanhly.dart';
 import 'package:assets_manager/pages/nangcapPage.dart';
 import 'package:assets_manager/pages/thanhlyEditPage.dart';
 import 'package:assets_manager/pages/xacnhanthongtin.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_sotheodoi.dart';
+import 'package:assets_manager/services/db_diary.dart';
 import 'package:assets_manager/services/db_thanhly.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 import 'package:intl/intl.dart';
 
-class KhauHaoPage extends StatelessWidget {
-  final String ma;
+class Depreciation extends StatelessWidget {
+  final String idAsset;
   final int flag;
   final String? maPB;
 
-  const KhauHaoPage({Key? key, required this.ma, required this.flag, this.maPB})
+  const Depreciation(
+      {Key? key, required this.idAsset, required this.flag, this.maPB})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -47,12 +48,11 @@ class KhauHaoPage extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasData) {
-            return SoTheoDoiBlocProvider(
-              soTheoDoiBloc:
-                  SoTheoDoiBloc(DbSoTheoDoiService(), _authenticationserver),
+            return DiaryBlocProvider(
+              diaryBloc: DiaryBloc(DbDiaryService(), _authenticationserver),
               uid: snapshot.data!,
-              child: KhauHaoPages(
-                ma: ma,
+              child: DepreciationPage(
+                idAsset: idAsset,
                 flag: flag,
                 maPB: maPB ?? "",
               ),
@@ -70,26 +70,26 @@ class KhauHaoPage extends StatelessWidget {
   }
 }
 
-class KhauHaoPages extends StatefulWidget {
-  final String ma;
+class DepreciationPage extends StatefulWidget {
+  final String idAsset;
   final int flag;
   final String maPB;
-  const KhauHaoPages(
-      {Key? key, required this.ma, required this.flag, required this.maPB})
+  const DepreciationPage(
+      {Key? key, required this.idAsset, required this.flag, required this.maPB})
       : super(key: key);
 
   @override
-  _KhauHaoPagesState createState() => _KhauHaoPagesState();
+  _DepreciationPageState createState() => _DepreciationPageState();
 }
 
-class _KhauHaoPagesState extends State<KhauHaoPages> {
-  SoTheoDoiBloc? soTheoDoiBloc;
+class _DepreciationPageState extends State<DepreciationPage> {
+  DiaryBloc? diaryBloc;
   String email = FirebaseAuth.instance.currentUser?.email ?? "";
   String displayName = FirebaseAuth.instance.currentUser?.displayName ?? "";
   String maPb = '';
   String name = '';
-  List<SoTheoDoi> list = [];
-  SoTheoDoi soTheoDoi = new SoTheoDoi();
+  List<DiaryModel> list = [];
+  DiaryModel diaryModel = new DiaryModel();
 
   double khauHao = 0;
   double luyKe = 0;
@@ -101,19 +101,19 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    soTheoDoiBloc = SoTheoDoiBlocProvider.of(context)?.soTheoDoiBloc;
+    diaryBloc = DiaryBlocProvider.of(context)?.diaryBloc;
 
     maPb = displayName.length > 20 ? displayName.substring(0, 20) : '';
     name = displayName.length > 20
         ? displayName.substring(21, displayName.length)
         : displayName;
-    soTheoDoiBloc?.maQREditChanged.add(widget.ma + "|" + maPb);
-    //soTheoDoiBloc.maPbEditChanged.add(maPb);
+    diaryBloc?.idAssetEditChanged.add(widget.idAsset);
+    //DiaryBloc.maPbEditChanged.add(maPb);
   }
 
   void _addorEdit({
     required bool add,
-    required SoTheoDoi soTheoDoi,
+    required DiaryModel diaryModel,
     required double luyke,
     required int soThang,
     required bool flag,
@@ -122,9 +122,8 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (BuildContext context) => SoTheoDoiEditBlocProvider(
-                soTheoDoiEditBloc:
-                    SoTheoDoiEditBloc(DbSoTheoDoiService(), add, soTheoDoi),
+          builder: (BuildContext context) => DiaryEditBlocProvider(
+                diaryEditBloc: DiaryEditBloc(DbDiaryService(), add, diaryModel),
                 uid: '',
                 child: NangCapPage(
                   luyke: luyKe,
@@ -158,16 +157,15 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
         actions: [
           IconButton(
               onPressed: () async {
-                final Assets assets = await Navigator.push(
+                final AssetsModel assets = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => XacNhanThongTin(
-                      ma: soTheoDoi.Ma_qr ?? "",
+                      ma: diaryModel.qrCode ?? "",
                     ),
                   ),
                 );
                 if (assets != null) {
-                  print("${assets.Ten_ts}");
                   final pdfFile = await PdfThongTinKHApi.generate(
                       assets,
                       list,
@@ -189,7 +187,7 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
         ],
       ),
       body: StreamBuilder(
-          stream: soTheoDoiBloc?.listSTD,
+          stream: diaryBloc?.listDiaryModel,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -211,40 +209,44 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
   Widget _buildListViewSeparated(AsyncSnapshot snapshot) {
     list = snapshot.data;
     int length = list.length;
-    soTheoDoi = list[length - 1];
+    diaryModel = list[length - 1];
     int index = 0;
     DateTime now = DateTime.now();
-    DateTime start = DateTime.parse(list[0].Ngay_BD!);
+    DateTime start = DateTime.parse(list[0].starDate!);
     DateTime end;
 
     if (length == 1) {
       soThang = month(start, now);
-      khauHao = double.parse(_getOnlyNumbers(soTheoDoi.Khau_hao ?? ""));
+      khauHao = double.parse(_getOnlyNumbers(diaryModel.depreciation ?? ""));
       luyKe = khauHao * soThang;
       conLai =
-          double.parse(_getOnlyNumbers(soTheoDoi.Nguyen_gia ?? "")) - luyKe;
+          double.parse(_getOnlyNumbers(diaryModel.originalPrice ?? "")) - luyKe;
     } else if (length > 1) {
-      start = DateTime.parse(list[0].Ngay_BD ?? "");
-      end = DateTime.parse(list[length - 1].Thgian ?? "");
+      start = DateTime.parse(list[0].starDate ?? "");
+      end = DateTime.parse(list[length - 1].dateUpdate ?? "");
       for (index = 0; index < length; index++) {
         if (index == 0) {
-          luyKe += double.parse(_getOnlyNumbers(list[index].Khau_hao ?? "")) *
-              month(DateTime.parse(list[index].Ngay_BD ?? ""),
-                  DateTime.parse(list[index + 1].Thgian ?? ""));
+          luyKe +=
+              double.parse(_getOnlyNumbers(list[index].depreciation ?? "")) *
+                  month(DateTime.parse(list[index].starDate ?? ""),
+                      DateTime.parse(list[index + 1].dateUpdate ?? ""));
         } else if (index > 0 && index != length - 1) {
-          luyKe += double.parse(_getOnlyNumbers(list[index].Khau_hao ?? "")) *
-              month(DateTime.parse(list[index].Thgian ?? ""),
-                  DateTime.parse(list[index + 1].Thgian ?? ""));
+          luyKe +=
+              double.parse(_getOnlyNumbers(list[index].depreciation ?? "")) *
+                  month(DateTime.parse(list[index].dateUpdate ?? ""),
+                      DateTime.parse(list[index + 1].dateUpdate ?? ""));
         } else if (index > 0 && index == length - 1) {
-          luyKe += double.parse(_getOnlyNumbers(list[index].Khau_hao ?? "")) *
-              month(DateTime.parse(list[index].Thgian ?? ""), now);
+          luyKe +=
+              double.parse(_getOnlyNumbers(list[index].depreciation ?? "")) *
+                  month(DateTime.parse(list[index].dateUpdate ?? ""), now);
         }
       }
       _nguyenGia =
-          int.parse(_getOnlyNumbers(list[length - 1].Nguyen_gia ?? ""));
-      _tgsd = int.parse(list[length - 1].Tg_sd ?? "") - month(now, start);
+          int.parse(_getOnlyNumbers(list[length - 1].originalPrice ?? ""));
+      _tgsd = int.parse(list[length - 1].usedTime ?? "") - month(now, start);
       soThang = month(now, start);
-      khauHao = double.parse(_getOnlyNumbers(list[length - 1].Khau_hao ?? ""));
+      khauHao =
+          double.parse(_getOnlyNumbers(list[length - 1].depreciation ?? ""));
       conLai = _nguyenGia - luyKe;
     }
 
@@ -265,17 +267,17 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            _padding("Tên Tài Sản", soTheoDoi.Ten_ts ?? ""),
-            _padding("Nguyên Giá", soTheoDoi.Nguyen_gia ?? ""),
-            _padding("Thời Gian Sử Dụng(Tháng)", soTheoDoi.Tg_sd ?? ""),
+            _padding("Tên Tài Sản", diaryModel.nameAsset ?? ""),
+            _padding("Nguyên Giá", diaryModel.originalPrice ?? ""),
+            _padding("Thời Gian Sử Dụng(Tháng)", diaryModel.usedTime ?? ""),
             _padding(
                 "Ngày Bắt Đầu",
                 DateFormat('dd/MM/yyyy')
-                    .format(DateTime.parse(soTheoDoi.Ngay_BD ?? ""))),
+                    .format(DateTime.parse(diaryModel.starDate ?? ""))),
             _padding(
                 "Ngày Kết Thúc",
                 DateFormat('dd/MM/yyyy')
-                    .format(DateTime.parse(soTheoDoi.Ngay_KT ?? ""))),
+                    .format(DateTime.parse(diaryModel.endDate ?? ""))),
             Padding(
               padding: EdgeInsets.all(10.0),
               child: Text("Phần Thông Tin Khấu hao",
@@ -304,9 +306,9 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
                           _addorEditThanhLy(
                               add: true,
                               thanhLy: ThanhLy(
-                                  documentID: soTheoDoi.Ma_qr,
-                                  Ten_ts: soTheoDoi.Ten_ts,
-                                  Ma_pb: soTheoDoi.Ma_pb,
+                                  documentID: diaryModel.qrCode,
+                                  Ten_ts: diaryModel.nameAsset,
+                                  Ma_pb: diaryModel.idDepartment,
                                   Don_vi_TL: '',
                                   Nguyen_gia_TL: conLai.toInt().toVND(),
                                   Ngay_TL: ''));
@@ -328,7 +330,7 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
                         onPressed: () {
                           _addorEdit(
                               add: true,
-                              soTheoDoi: soTheoDoi,
+                              diaryModel: diaryModel,
                               luyke: luyKe,
                               soThang: soThang,
                               flag: true,
@@ -351,7 +353,7 @@ class _KhauHaoPagesState extends State<KhauHaoPages> {
                         onPressed: () {
                           _addorEdit(
                               add: true,
-                              soTheoDoi: soTheoDoi,
+                              diaryModel: diaryModel,
                               luyke: luyKe,
                               soThang: soThang,
                               flag: false,

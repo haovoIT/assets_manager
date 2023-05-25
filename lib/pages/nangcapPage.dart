@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:assets_manager/bloc/sotheodoi_edit_bloc.dart';
-import 'package:assets_manager/bloc/sotheodoi_edit_bloc_provider.dart';
+import 'package:assets_manager/bloc/diary_edit_bloc.dart';
+import 'package:assets_manager/bloc/diary_edit_bloc_provider.dart';
 import 'package:assets_manager/classes/money_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:select_dialog/select_dialog.dart';
 
 class NangCapPage extends StatefulWidget {
   final double luyke;
@@ -27,7 +26,7 @@ class NangCapPage extends StatefulWidget {
 }
 
 class _NangCapPageState extends State<NangCapPage> {
-  SoTheoDoiEditBloc? soTheoDoiEditBloc;
+  DiaryEditBloc? diaryEditBloc;
   TextEditingController _tenTsController = new TextEditingController();
   TextEditingController _nguyenGiaController = new TextEditingController();
   TextEditingController _tgSdController = new TextEditingController();
@@ -66,13 +65,13 @@ class _NangCapPageState extends State<NangCapPage> {
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    soTheoDoiEditBloc =
-        SoTheoDoiEditBlocProvider.of(context)?.soTheoDoiEditBloc;
+    diaryEditBloc =
+        DiaryEditBlocProvider.of(context)?.diaryEditBloc;
   }
 
   void _addOrUpdate() {
-    soTheoDoiEditBloc?.maPbEditChanged.add(widget.maPB);
-    soTheoDoiEditBloc?.saveEditChanged.add('Save');
+    diaryEditBloc?.idDepartmentEditChanged.add(widget.maPB);
+    diaryEditBloc?.saveEditChanged.add('Save');
     Navigator.pop(context);
   }
 
@@ -108,7 +107,7 @@ class _NangCapPageState extends State<NangCapPage> {
               Padding(
                 padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
                 child: StreamBuilder(
-                  stream: soTheoDoiEditBloc?.tenTsEdit,
+                  stream: diaryEditBloc?.nameAssetEdit,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (!snapshot.hasData) {
                       return Container();
@@ -134,7 +133,7 @@ class _NangCapPageState extends State<NangCapPage> {
                 ),
               ), //Tên TS
               StreamBuilder(
-                stream: soTheoDoiEditBloc?.nguyenGiaEdit,
+                stream: diaryEditBloc?.originalPriceEdit,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if (!snapshot.hasData) {
                     return Container();
@@ -155,7 +154,7 @@ class _NangCapPageState extends State<NangCapPage> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)))),
                       onChanged: (nguyenGia) => {
-                            soTheoDoiEditBloc?.nguyenGiaEditChanged
+                            diaryEditBloc?.originalPriceEditChanged
                                 .add(_getOnlyNumbers(nguyenGia).toVND()),
                           });
                 },
@@ -167,7 +166,7 @@ class _NangCapPageState extends State<NangCapPage> {
                       border: Border.all(width: 1, color: Color(0xffCED0D2)),
                       borderRadius: BorderRadius.all(Radius.circular(10))),
                   child: StreamBuilder(
-                    stream: soTheoDoiEditBloc?.tgSdEdit,
+                    stream: diaryEditBloc?.usedTimeEdit,
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       if (!snapshot.hasData) {
                         return Container();
@@ -206,7 +205,7 @@ class _NangCapPageState extends State<NangCapPage> {
                                       )
                                     : Text(_tgsd),
                                 onPressed: () async {
-                                  SelectDialog.showModal<String>(
+                                  /*SelectDialog.showModal<String>(
                                     context,
                                     label: "Số tháng sử dụng",
                                     titleStyle: TextStyle(color: Colors.brown),
@@ -240,11 +239,11 @@ class _NangCapPageState extends State<NangCapPage> {
                                         ngayKTi = false;
                                         tgsdi = int.parse(selected);
                                         _tgsd = selected;
-                                        soTheoDoiEditBloc?.tgSdEditChanged
+                                        diaryEditBloc?.tgSdEditChanged
                                             .add(selected);
                                       });
                                     },
-                                  );
+                                  );*/
                                 },
                               ),
                               Text(
@@ -263,7 +262,7 @@ class _NangCapPageState extends State<NangCapPage> {
               Padding(
                 padding: EdgeInsets.only(top: 10.0, bottom: 10.0),
                 child: StreamBuilder(
-                  stream: soTheoDoiEditBloc?.ngayBDEdit,
+                  stream: diaryEditBloc?.starDateEdit,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (!snapshot.hasData) {
                       return Container();
@@ -291,7 +290,7 @@ class _NangCapPageState extends State<NangCapPage> {
               Padding(
                 padding: EdgeInsets.only(bottom: 10.0),
                 child: StreamBuilder(
-                  stream: soTheoDoiEditBloc?.ngayKTEdit,
+                  stream: diaryEditBloc?.endDateEdit,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (!snapshot.hasData) {
                       return Container();
@@ -306,7 +305,7 @@ class _NangCapPageState extends State<NangCapPage> {
                           .copyWith(
                               text: DateFormat('dd/MM/yyyy')
                                   .format(DateTime.parse(ngayKT)));
-                      soTheoDoiEditBloc?.ngayKTEditChanged.add(ngayKT);
+                      diaryEditBloc?.endDateEditChanged.add(ngayKT);
                     }
                     return TextFormField(
                       controller: _ngayKTController,
@@ -334,7 +333,7 @@ class _NangCapPageState extends State<NangCapPage> {
                           color: flagLyDo ? Color(0xffCED0D2) : Colors.red),
                       borderRadius: BorderRadius.all(Radius.circular(10))),
                   child: StreamBuilder(
-                    stream: soTheoDoiEditBloc?.lyDoEdit,
+                    stream: diaryEditBloc?.detailEdit,
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       if (!snapshot.hasData) {
                         return Container();
@@ -365,7 +364,7 @@ class _NangCapPageState extends State<NangCapPage> {
                             ),
                             onPressed: () async {
                               String? lydo = await _selectLyDo();
-                              soTheoDoiEditBloc?.lyDoEditChanged
+                              diaryEditBloc?.detailEditChanged
                                   .add(_getOnlyCharacters(lydo ?? ""));
                               setState(() {
                                 flagLyDo = true;
@@ -379,7 +378,7 @@ class _NangCapPageState extends State<NangCapPage> {
                 ),
               ), //Lydo
               StreamBuilder(
-                stream: soTheoDoiEditBloc?.khauHaoEdit,
+                stream: diaryEditBloc?.depreciationEdit,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if (!snapshot.hasData) {
                     return Container();
@@ -394,7 +393,7 @@ class _NangCapPageState extends State<NangCapPage> {
                     khauHao = nguyenGiacl / tgcl;
                     _khauHaoController.value = _khauHaoController.value
                         .copyWith(text: khauHao.toInt().toVND());
-                    soTheoDoiEditBloc?.khauHaoEditChanged
+                    diaryEditBloc?.depreciationEditChanged
                         .add(khauHao.toInt().toVND());
                   }
                   return TextField(
@@ -413,7 +412,7 @@ class _NangCapPageState extends State<NangCapPage> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)))),
                       onChanged: (khauHao) =>
-                          soTheoDoiEditBloc?.khauHaoEditChanged.add(khauHao));
+                          diaryEditBloc?.depreciationEditChanged.add(khauHao));
                 },
               ), //khauhao
               SizedBox(

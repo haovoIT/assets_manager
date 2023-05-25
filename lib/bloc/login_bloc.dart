@@ -7,7 +7,7 @@ import 'package:assets_manager/component/shared_preferences.dart';
 import 'package:assets_manager/services/db_authentic_api.dart';
 import 'package:flutter/material.dart';
 
-class LoginBloc with Validators, SharedPreferencesManager {
+class LoginBloc with SharedPreferencesManager {
   final AuthenticationApi authenticationApi;
   String? _name;
   String? _email;
@@ -31,13 +31,14 @@ class LoginBloc with Validators, SharedPreferencesManager {
   final StreamController<String> _emailController =
       StreamController<String>.broadcast();
   Sink<String> get emailChanged => _emailController.sink;
-  Stream<String> get email => _emailController.stream.transform(validateEmail);
+  Stream<String> get email =>
+      _emailController.stream.transform(Validators().validateEmail);
 
   final StreamController<String> _passwordController =
       StreamController<String>.broadcast();
   Sink<String> get passwordChanged => _passwordController.sink;
   Stream<String> get password =>
-      _passwordController.stream.transform(validatePassword);
+      _passwordController.stream.transform(Validators().validatePassword);
 
   final StreamController<bool> _enableLoginCreateButtonController =
       StreamController<bool>.broadcast();
@@ -62,7 +63,7 @@ class LoginBloc with Validators, SharedPreferencesManager {
       StreamController<String>.broadcast();
   Sink<String> get emailsEditChanged => _emailsController.sink;
   Stream<String> get emailsEdit =>
-      _emailsController.stream.transform(validateEmail);
+      _emailsController.stream.transform(Validators().validateEmail);
 
   final StreamController<String> _forgotPasswordController =
       StreamController<String>.broadcast();
@@ -190,6 +191,7 @@ class LoginBloc with Validators, SharedPreferencesManager {
       print('Login_Bloc:/Gửi email thành công.');
       return result;
     });
+    return null;
   }
 
   Future<String?> _updatePassword() async {
@@ -199,5 +201,6 @@ class LoginBloc with Validators, SharedPreferencesManager {
       print('Login_Bloc:/Cập nhật mật khẩu thành công.');
       return result;
     });
+    return null;
   }
 }

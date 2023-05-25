@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/sotheodoi.dart';
+import 'package:assets_manager/models/diary_model.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart';
 
 class PdfSTDKHApi {
-  static Future<File> generate(List<SoTheoDoi> list,String email,String name) async {
+  static Future<File> generate(List<DiaryModel> list,String email,String name) async {
     final myThem = ThemeData.withFont(
       base: Font.ttf(await rootBundle.load("assets/Open_Sans/OpenSans-Regular.ttf")),
       bold: Font.ttf(await rootBundle.load("assets/Open_Sans/OpenSans-Bold.ttf")),
@@ -24,7 +24,7 @@ class PdfSTDKHApi {
       build: (pw.Context context) => [
         buildHeader(name,email),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
-        buildTitle(list[0].Ten_ts??"", list[0].Thgian!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(list[0].Thgian!)):""),
+        buildTitle(list[0].nameAsset??"", list[0].nameAsset!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(list[0].dateUpdate!)):""),
         buildTable(list,0),
         buildEnd(list.length.toString()),
         pw.SizedBox(height: 1 * PdfPageFormat.cm),
@@ -34,7 +34,7 @@ class PdfSTDKHApi {
     ));
 
     return PdfApi.saveDocument(
-        name: "Theo_Doi_Khau_Hao_${list[0].Ten_ts}.pdf",
+        name: "Theo_Doi_Khau_Hao_${list[0].nameAsset}.pdf",
         pdf: pdf);
   }
 
@@ -97,7 +97,7 @@ class PdfSTDKHApi {
     ],
   );
 
-  static pw.Widget buildTable(List<SoTheoDoi> list, int index) {
+  static pw.Widget buildTable(List<DiaryModel> list, int index) {
     final headers = [
       'STT',
       'Tên Tài Sản',
@@ -115,16 +115,16 @@ class PdfSTDKHApi {
     final data = list.map((item) {
       return [
         index=index+1,
-        item.Ten_ts,
-        item.Nguyen_gia,
-        item.Tg_sd,
-        item.Thgian!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(item.Thgian!)):"",
-        item.Ngay_KT!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(item.Ngay_KT!)):"",
-        item.Ly_do,
-        item.Khau_hao,
-        item.Name,
-        item.Email,
-        item.Thgian!= null?DateFormat('HH:mm:ss \n dd/MM/yyyy').format(DateTime.parse(item.Thgian!)):"",
+        item.nameAsset,
+        item.originalPrice,
+        item.usedTime,
+        item.starDate!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(item.starDate!)):"",
+        item.endDate!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(item.endDate!)):"",
+        item.detail,
+        item.depreciation,
+        item.userName,
+        item.userEmail,
+        item.dateUpdate!= null?DateFormat('HH:mm:ss \n dd/MM/yyyy').format(DateTime.parse(item.dateUpdate!)):"",
       ];
     }).toList();
     return Table.fromTextArray(

@@ -2,6 +2,10 @@ abstract class DomainProvider {
   static const String ACT_LOGIN = "Login";
   static const String RESET = "Reset";
   static const String SAVE = "Save";
+  static const String SUCCESS = "SUCCESS";
+  static const String ERROR = "ERROR";
+  static const String CONVERT_ASSET_ALL = "CONVERT_ALL";
+  static const String CONVERT_ASSET_PART = "CONVERT_PART";
   static const String CREATE_ACCOUNT = "Create Account";
   static const String NOTIFICATION = "notification";
   static const String TRAINING = "training";

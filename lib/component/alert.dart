@@ -7,7 +7,9 @@ import 'package:assets_manager/component/global_styles.dart';
 import 'package:assets_manager/global_widget/text_field_login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
+import 'package:flutter_picker/Picker.dart';
 
 class Alert {
   static Duration duration = const Duration(seconds: 2);
@@ -43,14 +45,6 @@ class Alert {
 
   static void closeLoadingIndicator(context) {
     Navigator.of(context).pop();
-  }
-
-  static void showColoredToast() {
-    Fluttertoast.showToast(
-        msg: "This is Colored Toast with android duration of 5 Sec",
-        toastLength: Toast.LENGTH_SHORT,
-        backgroundColor: Colors.red,
-        textColor: Colors.white);
   }
 
   static void showForgotPassword(
@@ -214,6 +208,246 @@ class Alert {
                     CommonString.CONTINUE,
                     style: TextStyle(color: Colors.red),
                   ))
+            ],
+          );
+        });
+  }
+
+  static Future<String> selectDatetime(
+    context, {
+    required selectedDate,
+    maxTime,
+    minTime,
+  }) async {
+    DateTime _initialDate = DateTime.parse(selectedDate);
+    final DateTime? _pickedDate = await DatePicker.showDatePicker(
+      context,
+      showTitleActions: true,
+      minTime: minTime ?? DateTime(2013, 1, 1),
+      maxTime: maxTime ?? DateTime.now(),
+      theme: DatePickerTheme(
+          headerColor: Colors.blue,
+          itemStyle: TextStyle(
+              color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 22),
+          doneStyle: TextStyle(color: Colors.white, fontSize: 16)),
+      currentTime: _initialDate,
+      locale: LocaleType.vi,
+    );
+
+    if (_pickedDate != null) {
+      selectedDate = DateTime(
+              _pickedDate.year,
+              _pickedDate.month,
+              _pickedDate.day,
+              DateTime.now().hour,
+              DateTime.now().minute,
+              DateTime.now().second,
+              DateTime.now().millisecond,
+              DateTime.now().microsecond)
+          .toString();
+    }
+    return selectedDate;
+  }
+
+  static String getOnlyNumbers(String text) {
+    String cleanedText = text;
+    var onlyNumbersRegex = new RegExp(r'\D');
+    cleanedText = cleanedText.replaceAll(onlyNumbersRegex, '');
+    return cleanedText;
+  }
+
+  static Future<String> selectDatetimeStartDate(context,
+      {required DateTime selectedDate, required DateTime minTime}) async {
+    DateTime _initialDate = selectedDate;
+    final DateTime? _pickedDate = await DatePicker.showDatePicker(context,
+        showTitleActions: true,
+        minTime: minTime,
+        maxTime: DateTime.now(),
+        theme: DatePickerTheme(
+            headerColor: Colors.blue,
+            itemStyle: TextStyle(
+                color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 22),
+            doneStyle: TextStyle(color: Colors.white, fontSize: 16)),
+        currentTime: _initialDate,
+        locale: LocaleType.vi);
+
+    if (_pickedDate != null) {
+      selectedDate = DateTime(
+          _pickedDate.year,
+          _pickedDate.month,
+          _pickedDate.day,
+          DateTime.now().hour,
+          DateTime.now().minute,
+          DateTime.now().second,
+          DateTime.now().millisecond,
+          DateTime.now().microsecond);
+    }
+    return selectedDate.toString();
+  }
+
+  static String addMonth(int userTime, String startDate) {
+    DateTime ngayBD = DateTime.parse(startDate);
+    String selectedDate;
+    double index = userTime / 12;
+    selectedDate = DateTime(
+            ngayBD.year + index.toInt(),
+            ngayBD.month,
+            ngayBD.day,
+            ngayBD.hour,
+            ngayBD.minute,
+            ngayBD.second,
+            ngayBD.millisecond,
+            ngayBD.microsecond)
+        .toString();
+    return selectedDate;
+  }
+
+  static Future<String?> selectStatus(context) async {
+    String? results;
+    await Picker(
+        height: 220,
+        itemExtent: 50,
+        textStyle: GlobalStyles.textStyleTextFormField,
+        adapter: PickerDataAdapter<String>(pickerData: AssetString.LIST_STATUS),
+        changeToFirst: true,
+        hideHeader: false,
+        cancelText: CommonString.CANCEL,
+        confirmText: CommonString.CONTINUE,
+        cancelTextStyle: TextStyle(color: Colors.white, fontSize: 20.0),
+        confirmTextStyle: TextStyle(color: Colors.white, fontSize: 20.0),
+        title: Text(
+          AssetString.CHOOSE_STATUS,
+          style: TextStyle(
+            fontSize: 22.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        headerColor: AppColors.accentBlue,
+        selectedTextStyle:
+            TextStyle(color: AppColors.greenLight, fontWeight: FontWeight.bold),
+        onConfirm: (picker, value) {
+          results = picker.adapter.text;
+        }).showModal(context);
+    return results;
+  }
+
+  static Future<dynamic> showResponse({
+    required String successMessage,
+    required String errorMessage,
+    required BuildContext context,
+    required Stream<String>? streamBuilder,
+    required Sink<String>? sink,
+  }) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) => StreamBuilder(
+        stream: streamBuilder,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          final data = snapshot.data;
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          } else if (data != "" && data.isNotEmpty == true) {
+            if (data == DomainProvider.SUCCESS) {
+              return CupertinoAlertDialog(
+                title: Text(CommonString.SUCCESS),
+                content: Text(successMessage),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text(CommonString.OK),
+                    onPressed: () {
+                      Navigator.pop(context, DomainProvider.SUCCESS);
+                      sink?.close();
+                    },
+                  )
+                ],
+              );
+            } else if (data == DomainProvider.ERROR) {
+              return CupertinoAlertDialog(
+                title: Text(CommonString.ERROR),
+                content: Text(errorMessage),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text(CommonString.OK),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      sink?.close();
+                    },
+                  )
+                ],
+              );
+            }
+          }
+
+          return CupertinoAlertDialog(
+            title: Text(CommonString.ERROR),
+            content: Text(CommonString.ERROR_MESSAGE),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: Text(CommonString.OK),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  sink?.close();
+                },
+              )
+            ],
+          );
+        },
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  static String getOnlyCharacters(String text) {
+    String cleanedText = text;
+    cleanedText = cleanedText.replaceAll('[', '');
+    cleanedText = cleanedText.replaceAll(']', '');
+    return cleanedText;
+  }
+
+  static String depreciation(String originalPrice, int usedTime) {
+    int submit;
+    submit = int.parse(Alert.getOnlyNumbers(originalPrice)) ~/ usedTime;
+    return submit.toVND();
+  }
+
+  static Future<dynamic> showConfirm(
+    context, {
+    required String title,
+    required String detail,
+    required String btTextTrue,
+    required String btTextFalse,
+    bool? isClose,
+  }) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return CupertinoAlertDialog(
+            title: Text(
+              title,
+              style: TextStyle(
+                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              detail,
+              style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
+            ),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: Text(btTextFalse),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              CupertinoDialogAction(
+                child: Text(btTextTrue),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+              isClose != null && isClose == true
+                  ? CupertinoDialogAction(
+                      child: Text(CommonString.CANCEL),
+                      onPressed: () => Navigator.pop(context),
+                    )
+                  : SizedBox(),
             ],
           );
         });

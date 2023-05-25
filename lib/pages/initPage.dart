@@ -4,9 +4,9 @@ import 'package:assets_manager/bloc/home_bloc.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
 import 'package:assets_manager/pages/home.dart';
 import 'package:assets_manager/pages/loginPage.dart';
+import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_lichsusudung.dart';
-import 'package:assets_manager/services/db_taisan.dart';
+import 'package:assets_manager/services/db_history_asset.dart';
 import 'package:flutter/material.dart';
 
 class InitPage extends StatelessWidget {
@@ -27,8 +27,8 @@ class InitPage extends StatelessWidget {
           } else if (snapshot.data != null &&
               snapshot.data?.isNotEmpty == true) {
             return HomeBlocProvider(
-                homeBloc: HomeBloc(DbFirestoreService(), DbLSSDService(),
-                    _authenticationServer),
+                homeBloc: HomeBloc(DbFirestoreService(),
+                    DbHistoryAssetService(), _authenticationServer),
                 uid: snapshot.data!,
                 child: _buildMaterialApp(Home()));
           } else {
@@ -44,7 +44,6 @@ class InitPage extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        bottomAppBarColor: Colors.blue,
       ),
       home: homePage,
     );

@@ -2,10 +2,10 @@ import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/bloc/home_bloc.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
-import 'package:assets_manager/models/taisan.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_lichsusudung.dart';
-import 'package:assets_manager/services/db_taisan.dart';
+import 'package:assets_manager/services/db_history_asset.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -32,8 +32,8 @@ class XacNhanThongTin extends StatelessWidget {
             );
           } else if (snapshot.hasData) {
             return HomeBlocProvider(
-              homeBloc: HomeBloc(
-                  DbFirestoreService(), DbLSSDService(), _authenticationserver),
+              homeBloc: HomeBloc(DbFirestoreService(), DbHistoryAssetService(),
+                  _authenticationserver),
               uid: snapshot.data!,
               child: XacNhanThongTins(
                 ma: ma,
@@ -113,18 +113,18 @@ class _XacNhanThongTinsState extends State<XacNhanThongTins> {
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 500, crossAxisSpacing: 1, mainAxisSpacing: 1),
       itemBuilder: (BuildContext context, int index) {
-        String _title = snapshot.data[index].Ten_ts;
-        String _subtilte = snapshot.data[index].Ten_pb;
+        String _title = snapshot.data[index].nameAsset;
+        String _subtilte = snapshot.data[index].departmentName;
         String _namsx = DateFormat.yMd()
-            .format(DateTime.parse(snapshot.data[index].Nam_sx));
-        String _nuocsx = snapshot.data[index].Nuoc_sx;
-        String _nts = snapshot.data[index].Ten_nts;
-        String _tt = snapshot.data[index].Tinh_trang;
-        String _ng = snapshot.data[index].Nguyen_gia;
-        String _tg = snapshot.data[index].Tg_sd + "Tháng";
-        String _sl = snapshot.data[index].So_luong;
-        String _hd = snapshot.data[index].Ten_hd;
-        String _md = snapshot.data[index].Mdsd;
+            .format(DateTime.parse(snapshot.data[index].yearOfManufacture));
+        String _nuocsx = snapshot.data[index].producingCountry;
+        String _nts = snapshot.data[index].assetGroupName;
+        String _tt = snapshot.data[index].status;
+        String _ng = snapshot.data[index].originalPrice;
+        String _tg = snapshot.data[index].usedTime + "Tháng";
+        String _sl = snapshot.data[index].amount;
+        String _hd = snapshot.data[index].contractName;
+        String _md = snapshot.data[index].purposeOfUsing;
         return Card(
           color: Colors.grey.shade200,
           child: InkWell(
@@ -159,22 +159,22 @@ class _XacNhanThongTinsState extends State<XacNhanThongTins> {
               ),
             ),
             onTap: () {
-              final assets = Assets(
+              final assets = AssetsModel(
                   documentID: snapshot.data[index].documentID,
-                  Ten_ts: snapshot.data[index].Ten_ts,
-                  Ten_pb: snapshot.data[index].Ten_pb,
-                  Ma_pb: snapshot.data[index].Ma_pb,
-                  Nam_sx: snapshot.data[index].Nam_sx,
-                  Nuoc_sx: snapshot.data[index].Nuoc_sx,
-                  Ten_nts: snapshot.data[index].Ten_nts,
-                  Tinh_trang: snapshot.data[index].Tinh_trang,
-                  Ma_qr: snapshot.data[index].Ma_qr,
-                  Tg_sd: snapshot.data[index].Tg_sd,
-                  So_luong: snapshot.data[index].So_luong,
-                  Ten_hd: snapshot.data[index].Ten_hd,
-                  Mdsd: snapshot.data[index].Mdsd,
-                  Nguyen_gia: snapshot.data[index].Nguyen_gia,
-                  Uid: snapshot.data[index].Uid);
+                  nameAsset: snapshot.data[index].nameAsset,
+                  departmentName: snapshot.data[index].departmentName,
+                  idDepartment: snapshot.data[index].idDepartment,
+                  yearOfManufacture: snapshot.data[index].yearOfManufacture,
+                  producingCountry: snapshot.data[index].producingCountry,
+                  assetGroupName: snapshot.data[index].assetGroupName,
+                  status: snapshot.data[index].status,
+                  qrCode: snapshot.data[index].qrCode,
+                  usedTime: snapshot.data[index].usedTime,
+                  amount: snapshot.data[index].amount,
+                  contractName: snapshot.data[index].contractName,
+                  purposeOfUsing: snapshot.data[index].purposeOfUsing,
+                  originalPrice: snapshot.data[index].originalPrice,
+                  userId: snapshot.data[index].userId);
               Navigator.pop(context, assets);
             },
           ),

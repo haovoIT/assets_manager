@@ -1,15 +1,16 @@
 import 'dart:io';
+
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/taisan.dart';
+import 'package:assets_manager/models/asset_model.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart';
 
 class PdfPhieuKiemKeApi {
   static Future<File> generate(
-      List<Assets> list, String email, String name) async {
+      List<AssetsModel> list, String email, String name) async {
     final myThem = ThemeData.withFont(
       base: Font.ttf(
           await rootBundle.load("assets/Open_Sans/OpenSans-Regular.ttf")),
@@ -30,10 +31,12 @@ class PdfPhieuKiemKeApi {
             ]));
 
     return PdfApi.saveDocuments(
-        name: "Phieu_Kiem_Ke_${DateTime.now()}.pdf", pdf: pdf,maPB: list[0].Ma_pb??"");
+        name: "Phieu_Kiem_Ke_${DateTime.now()}.pdf",
+        pdf: pdf,
+        maPB: list[0].qrCode ?? "");
   }
 
-  static pw.Widget build(List<Assets> list, String name, int index) {
+  static pw.Widget build(List<AssetsModel> list, String name, int index) {
     return ListView.builder(
         itemBuilder: (Context context, int index) {
           return pw.Padding(
@@ -43,9 +46,9 @@ class PdfPhieuKiemKeApi {
         itemCount: list.length);
   }
 
-  static pw.Widget buildTableFull(Assets assets, String name) {
-    String _title = assets.Ten_ts??"";
-    String _subtilte = assets.Ten_pb??"";
+  static pw.Widget buildTableFull(AssetsModel assets, String name) {
+    String _title = assets.nameAsset ?? "";
+    String _subtilte = assets.departmentName ?? "";
     String _ngayKK = DateFormat('dd/MM/yyyy').format(DateTime.now());
     return pw.Column(children: <Widget>[
       pw.Container(
@@ -63,7 +66,7 @@ class PdfPhieuKiemKeApi {
                 width: 60,
                 height: 60,
                 barcode: pw.Barcode.qrCode(),
-                data: assets.Ma_qr??"",
+                data: assets.qrCode ?? "",
                 padding: EdgeInsets.all(10.0),
               ),
               pw.Container(
@@ -79,7 +82,8 @@ class PdfPhieuKiemKeApi {
             ]),
             pw.TableRow(children: [
               buildColumnName('Tên tài sản: '),
-              buildColumnValueStart(_title+"  ,Số Lượng:...../${assets.So_luong}"),
+              buildColumnValueStart(
+                  _title + "  ,Số Lượng:...../${assets.amount}"),
             ]),
             pw.TableRow(children: [
               buildColumnName('Phòng Ban: '),

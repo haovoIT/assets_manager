@@ -7,12 +7,12 @@ import 'package:assets_manager/bloc/home_bloc_provider.dart';
 import 'package:assets_manager/inPDF/inPDF_DanhSachTaiSan.dart';
 import 'package:assets_manager/inPDF/inPDF_ThongTinTaiSan.dart';
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/taisan.dart';
-import 'package:assets_manager/pages/assetsEditPage.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/pages/assets_edit_page.dart';
+import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_lichsusudung.dart';
-import 'package:assets_manager/services/db_sotheodoi.dart';
-import 'package:assets_manager/services/db_taisan.dart';
+import 'package:assets_manager/services/db_diary.dart';
+import 'package:assets_manager/services/db_history_asset.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +38,8 @@ class BienCoTaiSan extends StatelessWidget {
             );
           } else if (snapshot.hasData) {
             return HomeBlocProvider(
-              homeBloc: HomeBloc(
-                  DbFirestoreService(), DbLSSDService(), _authenticationserver),
+              homeBloc: HomeBloc(DbFirestoreService(), DbHistoryAssetService(),
+                  _authenticationserver),
               uid: snapshot.data!,
               child: BienCoTaiSans(),
             );
@@ -68,13 +68,13 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
   HomeBloc? _homeBloc;
   late TabController _tabController;
   int tongso = 0;
-  Assets assets = new Assets();
-  List<Assets> listAsset = [];
-  List<Assets> listAssetNSD = [];
-  List<Assets> listAssetMM = [];
-  List<Assets> listAssetHH = [];
-  String? email = FirebaseAuth.instance.currentUser?.email;
-  String? displayName = FirebaseAuth.instance.currentUser?.displayName;
+  AssetsModel assets = new AssetsModel();
+  List<AssetsModel> listAsset = [];
+  List<AssetsModel> listAssetNSD = [];
+  List<AssetsModel> listAssetMM = [];
+  List<AssetsModel> listAssetHH = [];
+  String email = FirebaseAuth.instance.currentUser?.email ?? "";
+  String displayName = FirebaseAuth.instance.currentUser?.displayName ?? "";
   String maPb = '';
   String name = '';
   int ngungSD = 0;
@@ -90,14 +90,14 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
     super.didChangeDependencies();
     _homeBloc = HomeBlocProvider.of(context)!.homeBloc;
     _homeBloc!.tinhtrangEditChanged.add("Ngừng Sử Dụng");
-    maPb = displayName!.length > 20 ? displayName!.substring(0, 20) : '';
-    name = displayName!.length > 20
-        ? displayName!.substring(21, displayName!.length)
-        : displayName!;
+    maPb = displayName.length > 20 ? displayName.substring(0, 20) : '';
+    name = displayName.length > 20
+        ? displayName.substring(21, displayName.length)
+        : displayName;
     _homeBloc?.maPBEditChanged.add(maPb);
   }
 
-  void _addorEditAsset({required bool add, required Assets assets}) {
+  void _addorEditAsset({required bool add, required AssetsModel assets}) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -105,11 +105,11 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                 assetsEditBloc: AssetsEditBloc(
                   add: add,
                   dbApi: DbFirestoreService(),
-                  dbLSSDApi: DbLSSDService(),
-                  dbSTDApi: DbSoTheoDoiService(),
+                  dbHistoryAssetApi: DbHistoryAssetService(),
+                  dbDiaryApi: DbDiaryService(),
                   selectAsset: assets,
                 ),
-                child: EditAssets(flag: add),
+                child: AssetEditPage(flag: add),
               ),
           fullscreenDialog: true),
     );
@@ -170,7 +170,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                                 onPressed: () async {
                                   final pdfFile = await PdfDSTaiSanApi.generate(
                                       listAssetNSD,
-                                      email ?? "",
+                                      email,
                                       name,
                                       "Ngừng Sử Dụng");
                                   PdfApi.openFile(pdfFile);
@@ -182,10 +182,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                             TextButton(
                                 onPressed: () async {
                                   final pdfFile = await PdfDSTaiSanApi.generate(
-                                      listAssetMM,
-                                      email ?? "",
-                                      name,
-                                      "Mất Mát");
+                                      listAssetMM, email, name, "Mất Mát");
                                   PdfApi.openFile(pdfFile);
                                 },
                                 child: Text("Mất Mát",
@@ -193,10 +190,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                             TextButton(
                                 onPressed: () async {
                                   final pdfFile = await PdfDSTaiSanApi.generate(
-                                      listAssetHH,
-                                      email ?? "",
-                                      name,
-                                      "Hư Hỏng");
+                                      listAssetHH, email, name, "Hư Hỏng");
                                   PdfApi.openFile(pdfFile);
                                 },
                                 child: Text("Hư Hỏng",
@@ -204,7 +198,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                             TextButton(
                                 onPressed: () async {
                                   final pdfFile = await PdfDSTaiSanApi.generate(
-                                      listAsset, email ?? "", name, "Biến Cố");
+                                      listAsset, email, name, "Biến Cố");
                                   PdfApi.openFile(pdfFile);
                                 },
                                 child: Text("Tất cả",
@@ -306,24 +300,25 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
     return ListView.separated(
         itemCount: snapshot.data.length,
         itemBuilder: (BuildContext context, int index) {
-          String _title = snapshot.data[index].Ten_ts;
+          String _title = snapshot.data[index].nameAsset;
+          String _sub = snapshot.data[index].departmentName;
+          String _namsx = DateFormat.yMd()
+              .format(DateTime.parse(snapshot.data[index].yearOfManufacture));
+          String _nuocsx = snapshot.data[index].producingCountry;
+          String _nts = snapshot.data[index].assetGroupName;
+          String _tt = snapshot.data[index].status;
+          String _ng = snapshot.data[index].originalPrice;
+          String _tg = snapshot.data[index].usedTime;
+          String _sl = snapshot.data[index].amount;
+          String _hd = snapshot.data[index].contractName;
+          String _md = snapshot.data[index].purposeOfUsing;
+          String _qr = snapshot.data[index].qrCode;
+
           String _subtilte = "NSX: " +
               DateFormat.yMd()
                   .format(DateTime.parse(snapshot.data[index].Nam_sx)) +
               "\t\t\tTình Trạng: " +
               snapshot.data[index].Tinh_trang;
-          String _sub = snapshot.data[index].Ten_pb;
-          String _namsx = DateFormat.yMd()
-              .format(DateTime.parse(snapshot.data[index].Nam_sx));
-          String _nuocsx = snapshot.data[index].Nuoc_sx;
-          String _nts = snapshot.data[index].Ten_nts;
-          String _tt = snapshot.data[index].Tinh_trang;
-          String _ng = snapshot.data[index].Nguyen_gia;
-          String _tg = snapshot.data[index].Tg_sd;
-          String _sl = snapshot.data[index].So_luong;
-          String _hd = snapshot.data[index].Ten_hd;
-          String _md = snapshot.data[index].Mdsd;
-          String _qr = snapshot.data[index].Ma_qr;
           if (ngungSD == 1 && _tt == "Ngừng Sử Dụng" && NSD == true) {
             listAssetNSD.add(snapshot.data[index]);
             listAsset.add(snapshot.data[index]);
@@ -415,21 +410,32 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                             child: Center(
                                 child: TextButton(
                               onPressed: () async {
-                                final assets = Assets(
-                                    documentID: snapshot.data[index].documentID,
-                                    Ten_ts: snapshot.data[index].Ten_ts,
-                                    Ma_pb: snapshot.data[index].Ma_pb,
-                                    Nam_sx: snapshot.data[index].Nam_sx,
-                                    Nuoc_sx: snapshot.data[index].Nuoc_sx,
-                                    Ten_nts: snapshot.data[index].Ten_nts,
-                                    Tinh_trang: snapshot.data[index].Tinh_trang,
-                                    Ma_qr: snapshot.data[index].Ma_qr,
-                                    Tg_sd: snapshot.data[index].Tg_sd,
-                                    So_luong: snapshot.data[index].So_luong,
-                                    Ten_hd: snapshot.data[index].Ten_hd,
-                                    Mdsd: snapshot.data[index].Mdsd,
-                                    Nguyen_gia: snapshot.data[index].Nguyen_gia,
-                                    Uid: snapshot.data[index].Uid);
+                                final assets = AssetsModel(
+                                  documentID: snapshot.data[index].documentID,
+                                  nameAsset: snapshot.data[index].nameAsset,
+                                  departmentName:
+                                      snapshot.data[index].departmentName,
+                                  idDepartment:
+                                      snapshot.data[index].idDepartment,
+                                  yearOfManufacture:
+                                      snapshot.data[index].yearOfManufacture,
+                                  producingCountry:
+                                      snapshot.data[index].producingCountry,
+                                  assetGroupName:
+                                      snapshot.data[index].assetGroupName,
+                                  status: snapshot.data[index].status,
+                                  qrCode: snapshot.data[index].qrCode,
+                                  usedTime: snapshot.data[index].usedTime,
+                                  amount: snapshot.data[index].amount,
+                                  contractName:
+                                      snapshot.data[index].contractName,
+                                  purposeOfUsing:
+                                      snapshot.data[index].purposeOfUsing,
+                                  originalPrice:
+                                      snapshot.data[index].originalPrice,
+                                  userId: snapshot.data[index].userId,
+                                );
+
                                 final pdfFile = await PdfThongTinTSApi.generate(
                                     assets, email, name);
 
@@ -458,22 +464,22 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
               onTap: () {
                 _addorEditAsset(
                   add: false,
-                  assets: Assets(
+                  assets: AssetsModel(
                       documentID: snapshot.data[index].documentID,
-                      Ten_ts: snapshot.data[index].Ten_ts,
-                      Ten_pb: snapshot.data[index].Ten_pb,
-                      Ma_pb: snapshot.data[index].Ma_pb,
-                      Nam_sx: snapshot.data[index].Nam_sx,
-                      Nuoc_sx: snapshot.data[index].Nuoc_sx,
-                      Ten_nts: snapshot.data[index].Ten_nts,
-                      Tinh_trang: snapshot.data[index].Tinh_trang,
-                      Ma_qr: snapshot.data[index].Ma_qr,
-                      Tg_sd: snapshot.data[index].Tg_sd,
-                      So_luong: snapshot.data[index].So_luong,
-                      Ten_hd: snapshot.data[index].Ten_hd,
-                      Mdsd: snapshot.data[index].Mdsd,
-                      Nguyen_gia: snapshot.data[index].Nguyen_gia,
-                      Uid: snapshot.data[index].Uid),
+                      nameAsset: snapshot.data[index].nameAsset,
+                      departmentName: snapshot.data[index].departmentName,
+                      idDepartment: snapshot.data[index].idDepartment,
+                      yearOfManufacture: snapshot.data[index].yearOfManufacture,
+                      producingCountry: snapshot.data[index].producingCountry,
+                      assetGroupName: snapshot.data[index].assetGroupName,
+                      status: snapshot.data[index].status,
+                      qrCode: snapshot.data[index].qrCode,
+                      usedTime: snapshot.data[index].usedTime,
+                      amount: snapshot.data[index].amount,
+                      contractName: snapshot.data[index].contractName,
+                      purposeOfUsing: snapshot.data[index].purposeOfUsing,
+                      originalPrice: snapshot.data[index].originalPrice,
+                      userId: snapshot.data[index].userId),
                 );
               },
             ),

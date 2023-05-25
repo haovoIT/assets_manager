@@ -33,7 +33,7 @@ class MaskedTextController extends TextEditingController {
   String _lastUpdatedText = '';
 
   void updateText(String text) {
-    if (text != null) {
+    if (text != "") {
       this.text = this._applyMask(this.mask, text);
     } else {
       this.text = '';
@@ -58,7 +58,7 @@ class MaskedTextController extends TextEditingController {
   }
 
   @override
-  void set text(String newText) {
+  set text(String newText) {
     if (super.text != newText) {
       super.text = newText;
       this.moveCursorToEnd();

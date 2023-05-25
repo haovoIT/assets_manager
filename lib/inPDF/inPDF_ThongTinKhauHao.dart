@@ -1,17 +1,18 @@
 import 'dart:io';
+
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/taisan.dart';
-import 'package:assets_manager/models/sotheodoi.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/models/diary_model.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart';
 
 class PdfThongTinKHApi {
   static Future<File> generate(
-      Assets assets,
-      List<SoTheoDoi> list,
+      AssetsModel assets,
+      List<DiaryModel> list,
       String khauHao,
       String luyKe,
       String conLai,
@@ -31,7 +32,7 @@ class PdfThongTinKHApi {
     final pdf = pw.Document(theme: myThem);
     pdf.addPage(pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
-      margin: pw.EdgeInsets.only(top: 20,bottom: 10,left: 30,right: 30),
+      margin: pw.EdgeInsets.only(top: 20, bottom: 10, left: 30, right: 30),
       build: (pw.Context context) => [
         buildHeader(name, email),
         pw.SizedBox(height: 0.5 * PdfPageFormat.cm),
@@ -39,21 +40,22 @@ class PdfThongTinKHApi {
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
         buildColumnName("I. THÔNG TIN TÀI SẢN:"),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
-        buildTableFull(assets,list),
+        buildTableFull(assets, list),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
-        buildColumnName("II. DANH SÁCH THÔNG TIN THAY ĐỔI NÂNG CẤP, ĐỊNH GIÁ TÀI SẢN:"),
+        buildColumnName(
+            "II. DANH SÁCH THÔNG TIN THAY ĐỔI NÂNG CẤP, ĐỊNH GIÁ TÀI SẢN:"),
         pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.start,
-          crossAxisAlignment: pw.CrossAxisAlignment.center,
-          children: [
-            buildColumnValueStart("Số lần thay đổi: "),
-            buildColumnValueEnd("${list.length+1}"),
-          ]
-        ),
+            mainAxisAlignment: pw.MainAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              buildColumnValueStart("Số lần thay đổi: "),
+              buildColumnValueEnd("${list.length + 1}"),
+            ]),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
         buildTable(list, 0),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
-        buildColumnName("III. THÔNG TIN MỨC KHẤU KHAO, LŨY KẾ, GIÁ TRỊ CÒN LẠI CỦA TÀI SẢN:"),
+        buildColumnName(
+            "III. THÔNG TIN MỨC KHẤU KHAO, LŨY KẾ, GIÁ TRỊ CÒN LẠI CỦA TÀI SẢN:"),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
         buildTableKH(khauHao, luyKe, conLai),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
@@ -63,7 +65,8 @@ class PdfThongTinKHApi {
       footer: (pw.Context context) => buildFooter(email),
     ));
 
-    return PdfApi.saveDocument(name: "Khau_Hao_${assets.Ten_ts}.pdf", pdf: pdf);
+    return PdfApi.saveDocument(
+        name: "Khau_Hao_${assets.nameAsset}.pdf", pdf: pdf);
   }
 
   static pw.Widget buildHeader(String name, String email) => pw.Column(
@@ -102,7 +105,7 @@ class PdfThongTinKHApi {
         ],
       );
 
-  static pw.Widget buildTitle(Assets assets) => pw.Column(
+  static pw.Widget buildTitle(AssetsModel assets) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         mainAxisAlignment: pw.MainAxisAlignment.center,
         children: [
@@ -122,7 +125,7 @@ class PdfThongTinKHApi {
             width: 150,
             child: pw.BarcodeWidget(
               barcode: pw.Barcode.qrCode(),
-              data: assets.Ma_qr??"",
+              data: assets.qrCode ?? "",
             ),
           ),
           pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
@@ -175,22 +178,29 @@ class PdfThongTinKHApi {
         ),
       ]);
 
-
-  static pw.Widget buildTableFull(Assets assets,List<SoTheoDoi> list) {
-    String _title = assets.Ten_ts??"";
-    String _ng = list[list.length-1].Nguyen_gia??"";
-    String _tg = list[list.length-1].Tg_sd??"" + ' Tháng';
-    String _subtilte = assets.Ten_pb??"";
-    String _namsx =
-        assets.Nam_sx!= null? DateFormat('dd/MM/yyyy').format(DateTime.parse(assets.Nam_sx!)):"";
-    String _nuocsx = assets.Nuoc_sx??"";
-    String _nts = assets.Ten_nts??"";
-    String _tt = assets.Tinh_trang??"";
-    String _sl = assets.So_luong??"";
-    String _hd = assets.Ten_hd??"";
-    String _md = assets.Mdsd??"";
-    String _ngayBD = list[list.length-1].Ngay_BD!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(list[list.length-1].Ngay_BD!)):"";
-    String _ngayKT = list[list.length-1].Ngay_KT!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(list[list.length-1].Ngay_KT!)):"";
+  static pw.Widget buildTableFull(AssetsModel assets, List<DiaryModel> list) {
+    String _title = assets.nameAsset ?? "";
+    String _ng = list[list.length - 1].originalPrice ?? "";
+    String _tg = list[list.length - 1].usedTime ?? "" + ' Tháng';
+    String _subtilte = assets.departmentName ?? "";
+    String _namsx = assets.yearOfManufacture != null
+        ? DateFormat('dd/MM/yyyy')
+            .format(DateTime.parse(assets.yearOfManufacture!))
+        : "";
+    String _nuocsx = assets.producingCountry ?? "";
+    String _nts = assets.assetGroupName ?? "";
+    String _tt = assets.status ?? "";
+    String _sl = assets.amount ?? "";
+    String _hd = assets.contractName ?? "";
+    String _md = assets.purposeOfUsing ?? "";
+    String _ngayBD = list[list.length - 1].starDate != null
+        ? DateFormat('dd/MM/yyyy')
+            .format(DateTime.parse(list[list.length - 1].starDate!))
+        : "";
+    String _ngayKT = list[list.length - 1].endDate != null
+        ? DateFormat('dd/MM/yyyy')
+            .format(DateTime.parse(list[list.length - 1].endDate!))
+        : "";
 
     return pw.Column(children: <Widget>[
       pw.Container(
@@ -262,7 +272,7 @@ class PdfThongTinKHApi {
     ]);
   }
 
-  static pw.Widget buildTable(List<SoTheoDoi> list, int index) {
+  static pw.Widget buildTable(List<DiaryModel> list, int index) {
     final headers = [
       'STT',
       'Ngày Thay Đổi',
@@ -273,19 +283,21 @@ class PdfThongTinKHApi {
     ];
     final data = list.map((item) {
       return [
-        index=index+1,
-        item.Thgian!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(item.Thgian!)):"",
-        item.Ly_do,
-        item.Nguyen_gia,
-        item.Tg_sd??""+ " Tháng",
-        item.Khau_hao,
+        index = index + 1,
+        item.dateUpdate != null
+            ? DateFormat('dd/MM/yyyy').format(DateTime.parse(item.dateUpdate!))
+            : "",
+        item.detail,
+        item.originalPrice,
+        item.usedTime ?? "" + " Tháng",
+        item.depreciation,
       ];
     }).toList();
     return Table.fromTextArray(
       headers: headers,
       data: data,
-      border:TableBorder.all(),
-      headerStyle: TextStyle(fontWeight: FontWeight.bold,fontSize: 12),
+      border: TableBorder.all(),
+      headerStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
       headerAlignment: Alignment.topCenter,
       headerDecoration: BoxDecoration(color: PdfColors.grey300),
       cellHeight: 30,
@@ -354,14 +366,12 @@ class PdfThongTinKHApi {
       mainAxisSize: pw.MainAxisSize.min,
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
-        pw.Text(title??"", style: style),
+        pw.Text(title ?? "", style: style),
         pw.SizedBox(width: 2 * PdfPageFormat.mm),
-        pw.Text(value??""),
+        pw.Text(value ?? ""),
       ],
     );
   }
-
-
 
   static buildText({
     String? title,
@@ -376,8 +386,8 @@ class PdfThongTinKHApi {
       width: width,
       child: pw.Row(
         children: [
-          pw.Expanded(child: pw.Text(title??"", style: style)),
-          pw.Text(value??"", style: unite ? style : null),
+          pw.Expanded(child: pw.Text(title ?? "", style: style)),
+          pw.Text(value ?? "", style: unite ? style : null),
         ],
       ),
     );

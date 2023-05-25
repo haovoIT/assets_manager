@@ -1,12 +1,12 @@
 import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
-import 'package:assets_manager/bloc/sotheodoi_bloc.dart';
-import 'package:assets_manager/bloc/sotheodoi_bloc_provider.dart';
+import 'package:assets_manager/bloc/diary_bloc.dart';
+import 'package:assets_manager/bloc/diary_bloc_provider.dart';
 import 'package:assets_manager/inPDF/inPDF_SoTheoDoiKhauHao.dart';
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/sotheodoi.dart';
+import 'package:assets_manager/models/diary_model.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_sotheodoi.dart';
+import 'package:assets_manager/services/db_diary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
@@ -34,9 +34,9 @@ class SoTheoDoiPage extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasData) {
-            return SoTheoDoiBlocProvider(
-              soTheoDoiBloc:
-                  SoTheoDoiBloc(DbSoTheoDoiService(), _authenticationserver),
+            return DiaryBlocProvider(
+              diaryBloc:
+                 DiaryBloc(DbDiaryService(), _authenticationserver),
               uid: snapshot.data!,
               child: SoTheoDoiPages(
                 ma: ma,
@@ -64,9 +64,9 @@ class SoTheoDoiPages extends StatefulWidget {
 }
 
 class _SoTheoDoiPagesState extends State<SoTheoDoiPages> {
-  SoTheoDoiBloc? soTheoDoiBloc;
+  DiaryBloc? diaryBloc;
   HDTRefreshController _hdtRefreshController = HDTRefreshController();
-  List<SoTheoDoi> list = [];
+  List<DiaryModel> list = [];
 
   String email = FirebaseAuth.instance.currentUser?.email ?? "";
   String displayName = FirebaseAuth.instance.currentUser?.displayName ?? "";
@@ -77,12 +77,12 @@ class _SoTheoDoiPagesState extends State<SoTheoDoiPages> {
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    soTheoDoiBloc = SoTheoDoiBlocProvider.of(context)?.soTheoDoiBloc;
+    diaryBloc = DiaryBlocProvider.of(context)?.diaryBloc;
     maPb = displayName.length > 20 ? displayName.substring(0, 20) : '';
     name = displayName.length > 20
         ? displayName.substring(21, displayName.length)
         : displayName;
-    soTheoDoiBloc?.maQREditChanged.add(widget.ma + "|" + maPb);
+    diaryBloc?.idAssetEditChanged.add(widget.ma + "|" + maPb);
   }
 
   @override
@@ -106,7 +106,7 @@ class _SoTheoDoiPagesState extends State<SoTheoDoiPages> {
         ],
       ),
       body: StreamBuilder(
-          stream: soTheoDoiBloc?.listSTD,
+          stream: diaryBloc?.listDiaryModel,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -199,7 +199,7 @@ class _SoTheoDoiPagesState extends State<SoTheoDoiPages> {
 
   Widget _generateFirstColumnRow(BuildContext context, int index) {
     return Container(
-      child: Text('(${(index + 1).toString()}) ' + list[index].Ten_ts!,
+      child: Text('(${(index + 1).toString()}) ' + list[index].nameAsset!,
           style: TextStyle(fontSize: 14.0)),
       width: 150,
       height: 52,
@@ -211,28 +211,28 @@ class _SoTheoDoiPagesState extends State<SoTheoDoiPages> {
   Widget _generateRightHandSideColumnRow(BuildContext context, int index) {
     return Row(
       children: <Widget>[
-        _container(list[index].Nguyen_gia ?? "", 150, Alignment.centerRight),
-        _container(list[index].Tg_sd ?? "", 100, Alignment.center),
+        _container(list[index].originalPrice ?? "", 150, Alignment.centerRight),
+        _container(list[index].usedTime ?? "", 100, Alignment.center),
         _container(
             DateFormat('dd/MM/yyyy')
-                .format(DateTime.parse(list[index].Ngay_BD ?? "")),
+                .format(DateTime.parse(list[index].starDate ?? "")),
             100,
             Alignment.centerLeft),
         _container(
             DateFormat('dd/MM/yyyy')
-                .format(DateTime.parse(list[index].Ngay_KT ?? "")),
+                .format(DateTime.parse(list[index].endDate ?? "")),
             100,
             Alignment.centerLeft),
-        _container(list[index].Ly_do ?? "", 200, Alignment.centerLeft),
-        _container(list[index].Khau_hao ?? "", 150, Alignment.centerRight),
-        _container(list[index].Name ?? "", 200, Alignment.centerLeft),
-        _container(list[index].Email ?? "", 200, Alignment.centerLeft),
+        _container(list[index].detail ?? "", 200, Alignment.centerLeft),
+        _container(list[index].depreciation ?? "", 150, Alignment.centerRight),
+        _container(list[index].userName ?? "", 200, Alignment.centerLeft),
+        _container(list[index].userEmail ?? "", 200, Alignment.centerLeft),
         _container(
             DateFormat('dd/MM/yyyy')
-                    .format(DateTime.parse(list[index].Thgian ?? "")) +
+                    .format(DateTime.parse(list[index].dateUpdate ?? "")) +
                 "\n" +
                 DateFormat.Hms()
-                    .format(DateTime.parse(list[index].Thgian ?? "")),
+                    .format(DateTime.parse(list[index].dateUpdate ?? "")),
             100,
             Alignment.centerRight),
         //_container(listLSSD[index], ,  Alignment),

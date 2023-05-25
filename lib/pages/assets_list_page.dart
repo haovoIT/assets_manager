@@ -4,12 +4,12 @@ import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/bloc/home_bloc.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
-import 'package:assets_manager/models/taisan.dart';
-import 'package:assets_manager/pages/chuyentaisanEditPage.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/pages/assets_convert_page.dart';
+import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_lichsusudung.dart';
-import 'package:assets_manager/services/db_sotheodoi.dart';
-import 'package:assets_manager/services/db_taisan.dart';
+import 'package:assets_manager/services/db_diary.dart';
+import 'package:assets_manager/services/db_history_asset.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -37,8 +37,8 @@ class AssetsPageList extends StatelessWidget {
             );
           } else if (snapshot.hasData) {
             return HomeBlocProvider(
-              homeBloc: HomeBloc(
-                  DbFirestoreService(), DbLSSDService(), _authenticationserver),
+              homeBloc: HomeBloc(DbFirestoreService(), DbHistoryAssetService(),
+                  _authenticationserver),
               uid: snapshot.data!,
               child: AssetsPageLists(
                 maPB: maPB,
@@ -228,8 +228,7 @@ class _AssetsPageListsState extends State<AssetsPageLists> {
         });
   }
 
-  Future chuyendoi(bool isFull, Assets assets) async {
-    print("${assets.Ten_ts}");
+  Future chuyendoi(bool isFull, AssetsModel assets) async {
     if (isFull) {
       print("$isFull");
       Navigator.push(
@@ -239,12 +238,13 @@ class _AssetsPageListsState extends State<AssetsPageLists> {
                   assetsEditBloc: AssetsEditBloc(
                     add: false,
                     dbApi: DbFirestoreService(),
-                    dbLSSDApi: DbLSSDService(),
-                    dbSTDApi: DbSoTheoDoiService(),
+                    dbHistoryAssetApi: DbHistoryAssetService(),
+                    dbDiaryApi: DbDiaryService(),
                     selectAsset: assets,
                   ),
-                  child: ChuyenDoiEditPage(
+                  child: AssetConvertPage(
                     flag: true,
+                    assetsModel: assets,
                   ),
                 ),
             fullscreenDialog: true),
@@ -257,12 +257,13 @@ class _AssetsPageListsState extends State<AssetsPageLists> {
                   assetsEditBloc: AssetsEditBloc(
                     add: false,
                     dbApi: DbFirestoreService(),
-                    dbLSSDApi: DbLSSDService(),
-                    dbSTDApi: DbSoTheoDoiService(),
+                    dbHistoryAssetApi: DbHistoryAssetService(),
+                    dbDiaryApi: DbDiaryService(),
                     selectAsset: assets,
                   ),
-                  child: ChuyenDoiEditPage(
+                  child: AssetConvertPage(
                     flag: false,
+                    assetsModel: assets,
                   ),
                 ),
             fullscreenDialog: true),
