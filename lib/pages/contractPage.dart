@@ -81,8 +81,11 @@ class _ContractPagesState extends State<ContractPages> {
       context,
       MaterialPageRoute(
           builder: (BuildContext context) => ContractEditBlocProvider(
-                contractEditBloc:
-                    ContractEditBloc(add, DbContractService(), contract),
+                contractEditBloc: ContractEditBloc(
+                  add: add,
+                  dbCtApi: DbContractService(),
+                  selectContract: contract,
+                ),
                 child: ContractEditPage(),
               ),
           fullscreenDialog: true),

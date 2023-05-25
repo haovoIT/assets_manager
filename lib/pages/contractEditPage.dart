@@ -95,6 +95,7 @@ class _ContractEditPageState extends State<ContractEditPage> {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               StreamBuilder(
                 stream: _contractEditBloc?.soHDEdit,

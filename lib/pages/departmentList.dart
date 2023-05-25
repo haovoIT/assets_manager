@@ -3,10 +3,9 @@ import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/bloc/department_bloc.dart';
 import 'package:assets_manager/bloc/department_bloc_provider.dart';
 import 'package:assets_manager/models/phongban.dart';
-import 'package:assets_manager/pages/assetsPageList.dart';
+import 'package:assets_manager/pages/assets_list_page.dart';
 import 'package:assets_manager/services/db_authentic.dart';
 import 'package:assets_manager/services/db_phongban.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DepartmentsList extends StatelessWidget {

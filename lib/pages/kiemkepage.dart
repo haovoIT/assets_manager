@@ -6,10 +6,10 @@ import 'package:assets_manager/bloc/kehoachkiemke_edit_bloc.dart';
 import 'package:assets_manager/bloc/kehoachkiemke_edit_bloc_provider.dart';
 import 'package:assets_manager/inPDF/inPDF_PhieuKiemke.dart';
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/taisan.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_lichsusudung.dart';
-import 'package:assets_manager/services/db_taisan.dart';
+import 'package:assets_manager/services/db_history_asset.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,8 +36,8 @@ class KiemKePage extends StatelessWidget {
             );
           } else if (snapshot.hasData) {
             return HomeBlocProvider(
-              homeBloc: HomeBloc(
-                  DbFirestoreService(), DbLSSDService(), _authenticationserver),
+              homeBloc: HomeBloc(DbFirestoreService(), DbHistoryAssetService(),
+                  _authenticationserver),
               uid: snapshot.data!,
               child: KiemKePages(),
             );
@@ -66,7 +66,7 @@ class _KiemKePagesState extends State<KiemKePages> {
   KeHoachKiemKeEditBloc? keHoachKiemKeEditBloc;
   String? _uid;
   List<String> list = [];
-  List<Assets> listAssets = [];
+  List<AssetsModel> listAssets = [];
   String displayName = FirebaseAuth.instance.currentUser?.displayName ?? "";
   String maPb = '';
   String name = '';

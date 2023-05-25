@@ -4,10 +4,10 @@ import 'package:assets_manager/bloc/home_bloc.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
 import 'package:assets_manager/inPDF/inPDF_BaoCaoThucTrang.dart';
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/taisan.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_lichsusudung.dart';
-import 'package:assets_manager/services/db_taisan.dart';
+import 'package:assets_manager/services/db_history_asset.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +34,8 @@ class ThongKeThucTrang extends StatelessWidget {
             );
           } else if (snapshot.hasData) {
             return HomeBlocProvider(
-              homeBloc: HomeBloc(
-                  DbFirestoreService(), DbLSSDService(), _authenticationserver),
+              homeBloc: HomeBloc(DbFirestoreService(), DbHistoryAssetService(),
+                  _authenticationserver),
               uid: snapshot.data!,
               child: ThongKeThucTrangs(),
             );
@@ -67,7 +67,7 @@ class _ThongKeThucTrangsState extends State<ThongKeThucTrangs> {
   String maPb = '';
   String name = '';
   HDTRefreshController _hdtRefreshController = HDTRefreshController();
-  List<Assets> listAssets = [];
+  List<AssetsModel> listAssets = [];
   int dangSD = 0;
   int ngungSD = 0;
   int huHong = 0;
@@ -253,7 +253,7 @@ class _ThongKeThucTrangsState extends State<ThongKeThucTrangs> {
     ];
   }
 
-  void showChiTiet(List<Assets> listAssets) {
+  void showChiTiet(List<AssetsModel> listAssets) {
     showModalBottomSheet(
         context: context,
         builder: (context) => Container(
@@ -330,7 +330,7 @@ class _ThongKeThucTrangsState extends State<ThongKeThucTrangs> {
 
   Widget _generateFirstColumnRow(BuildContext context, int index) {
     return Container(
-      child: Text('(${(index + 1).toString()}) ' + listAssets[index].Ten_ts!,
+      child: Text('(${(index + 1).toString()}) ' + listAssets[index].nameAsset!,
           style: TextStyle(fontSize: 14.0)),
       width: 150,
       height: 52,
@@ -342,22 +342,26 @@ class _ThongKeThucTrangsState extends State<ThongKeThucTrangs> {
   Widget _generateRightHandSideColumnRow(BuildContext context, int index) {
     return Row(
       children: <Widget>[
+        _container(listAssets[index].status ?? "", 150, Alignment.centerLeft),
         _container(
-            listAssets[index].Tinh_trang ?? "", 150, Alignment.centerLeft),
-        _container(listAssets[index].Ten_pb ?? "", 150, Alignment.centerLeft),
+            listAssets[index].departmentName ?? "", 150, Alignment.centerLeft),
         _container(
-            DateFormat('dd/MM/yyyy')
-                .format(DateTime.parse(listAssets[index].Nam_sx ?? "")),
+            DateFormat('dd/MM/yyyy').format(
+                DateTime.parse(listAssets[index].yearOfManufacture ?? "")),
             100,
             Alignment.centerRight),
-        _container(listAssets[index].Nuoc_sx ?? "", 100, Alignment.center),
-        _container(listAssets[index].Ten_nts ?? "", 200, Alignment.center),
         _container(
-            listAssets[index].Nguyen_gia ?? "", 150, Alignment.centerRight),
-        _container(listAssets[index].Tg_sd ?? "", 100, Alignment.center),
-        _container(listAssets[index].So_luong ?? "", 100, Alignment.center),
-        _container(listAssets[index].Ten_hd ?? "", 200, Alignment.centerLeft),
-        _container(listAssets[index].Mdsd ?? "", 200, Alignment.centerLeft),
+            listAssets[index].producingCountry ?? "", 100, Alignment.center),
+        _container(
+            listAssets[index].assetGroupName ?? "", 200, Alignment.center),
+        _container(
+            listAssets[index].originalPrice ?? "", 150, Alignment.centerRight),
+        _container(listAssets[index].usedTime ?? "", 100, Alignment.center),
+        _container(listAssets[index].amount ?? "", 100, Alignment.center),
+        _container(
+            listAssets[index].contractName ?? "", 200, Alignment.centerLeft),
+        _container(
+            listAssets[index].purposeOfUsing ?? "", 200, Alignment.centerLeft),
         //_container(listLSSD[index], ,  Alignment),
       ],
     );

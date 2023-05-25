@@ -1,329 +1,499 @@
 import 'dart:async';
 
-import 'package:assets_manager/models/lichsusudungtaisan.dart';
-import 'package:assets_manager/models/sotheodoi.dart';
-import 'package:assets_manager/models/taisan.dart';
-import 'package:assets_manager/services/db_lichsusudung_api.dart';
-import 'package:assets_manager/services/db_sotheodoi_api.dart';
-import 'package:assets_manager/services/db_taisan_api.dart';
+import 'package:assets_manager/component/domain_service.dart';
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/models/diary_model.dart';
+import 'package:assets_manager/models/history_asset_model.dart';
+import 'package:assets_manager/services/db_asset_api.dart';
+import 'package:assets_manager/services/db_diary_api.dart';
+import 'package:assets_manager/services/db_history_asset_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AssetsEditBloc {
   final DbApi dbApi;
-  final DbLSSDApi dbLSSDApi;
-  final DbSTDApi dbSTDApi;
+  final DbHistoryAssetApi dbHistoryAssetApi;
+  final DbDiaryApi dbDiaryApi;
   final bool add;
-  Assets selectAsset;
+  AssetsModel selectAsset;
 
-  AssetsEditBloc(
-      {required this.add,
-      required this.dbApi,
-      required this.dbLSSDApi,
-      required this.dbSTDApi,
-      required this.selectAsset}) {
+  AssetsEditBloc({
+    required this.add,
+    required this.dbApi,
+    required this.dbHistoryAssetApi,
+    required this.dbDiaryApi,
+    required this.selectAsset,
+  }) {
     _startEditListeners().then((finished) => _getAssets(add, selectAsset));
   }
 
-  String? displayName = FirebaseAuth.instance.currentUser?.displayName;
+  String displayName = FirebaseAuth.instance.currentUser?.displayName ?? "";
   String maPb = '';
   String name = '';
-  String? email = FirebaseAuth.instance.currentUser?.email;
-  String? ngay_BD;
-  String? ngay_KT;
-  String? khauHao;
+  String email = FirebaseAuth.instance.currentUser?.email ?? "";
+  String userId = FirebaseAuth.instance.currentUser?.uid ?? "";
 
-  final StreamController<String> _tenTsController =
+  final StreamController<String> _nameAssetController =
       StreamController<String>.broadcast();
-  Sink<String> get tenTsEditChanged => _tenTsController.sink;
-  Stream<String> get tenTsEdit => _tenTsController.stream;
+  Sink<String> get nameAssetEditChanged => _nameAssetController.sink;
+  Stream<String> get nameAssetEdit => _nameAssetController.stream;
 
-  final StreamController<String> _maPbController =
+  final StreamController<String> _idDepartmentController =
       StreamController<String>.broadcast();
-  Sink<String> get maPbEditChanged => _maPbController.sink;
-  Stream<String> get maPbEdit => _maPbController.stream;
+  Sink<String> get idDepartmentEditChanged => _idDepartmentController.sink;
+  Stream<String> get idDepartmentEdit => _idDepartmentController.stream;
 
-  final StreamController<String> _tenPbController =
+  final StreamController<String> _departmentNameController =
       StreamController<String>.broadcast();
-  Sink<String> get tenPbEditChanged => _tenPbController.sink;
-  Stream<String> get tenPbEdit => _tenPbController.stream;
+  Sink<String> get departmentNameEditChanged => _departmentNameController.sink;
+  Stream<String> get departmentNameEdit => _departmentNameController.stream;
 
-  final StreamController<String> _namSXController =
+  final StreamController<String> _yearOfManufactureController =
       StreamController<String>.broadcast();
-  Sink<String> get namSXEditChanged => _namSXController.sink;
-  Stream<String> get namSXEdit => _namSXController.stream;
+  Sink<String> get yearOfManufactureEditChanged =>
+      _yearOfManufactureController.sink;
+  Stream<String> get yearOfManufactureEdit =>
+      _yearOfManufactureController.stream;
 
-  final StreamController<String> _nuocSxController =
+  final StreamController<String> _producingCountryController =
       StreamController<String>.broadcast();
-  Sink<String> get nuocSxEditChanged => _nuocSxController.sink;
-  Stream<String> get nuocSxEdit => _nuocSxController.stream;
+  Sink<String> get producingCountryEditChanged =>
+      _producingCountryController.sink;
+  Stream<String> get producingCountryEdit => _producingCountryController.stream;
 
-  final StreamController<String> _ntsController =
+  final StreamController<String> _assetGroupNameController =
       StreamController<String>.broadcast();
-  Sink<String> get NtsEditChanged => _ntsController.sink;
-  Stream<String> get NtsEdit => _ntsController.stream;
+  Sink<String> get assetGroupNameEditChanged => _assetGroupNameController.sink;
+  Stream<String> get assetGroupNameEdit => _assetGroupNameController.stream;
 
-  final StreamController<String> _ngayBDController =
+  final StreamController<String> _starDateController =
       StreamController<String>.broadcast();
-  Sink<String> get ngayBDEditChanged => _ngayBDController.sink;
-  Stream<String> get ngayBDEdit => _ngayBDController.stream;
+  Sink<String> get starDateEditChanged => _starDateController.sink;
+  Stream<String> get starDateEdit => _starDateController.stream;
 
-  final StreamController<String> _ngayKTController =
+  final StreamController<String> _endDateController =
       StreamController<String>.broadcast();
-  Sink<String> get ngayKTEditChanged => _ngayKTController.sink;
-  Stream<String> get ngayKTEdit => _ngayKTController.stream;
+  Sink<String> get endDateEditChanged => _endDateController.sink;
+  Stream<String> get endDateEdit => _endDateController.stream;
 
-  final StreamController<String> _TinhTrangController =
+  final StreamController<String> _statusController =
       StreamController<String>.broadcast();
-  Sink<String> get TinhTrangEditChanged => _TinhTrangController.sink;
-  Stream<String> get TinhTrangEdit => _TinhTrangController.stream;
+  Sink<String> get statusEditChanged => _statusController.sink;
+  Stream<String> get statusEdit => _statusController.stream;
 
-  final StreamController<String> _nguyenGiaController =
+  final StreamController<String> _originalPriceController =
       StreamController<String>.broadcast();
-  Sink<String> get nguyenGiaEditChanged => _nguyenGiaController.sink;
-  Stream<String> get nguyenGiaEdit => _nguyenGiaController.stream;
+  Sink<String> get originalPriceEditChanged => _originalPriceController.sink;
+  Stream<String> get originalPriceEdit => _originalPriceController.stream;
 
-  final StreamController<String> _tgSdController =
+  final StreamController<String> _usedTimeController =
       StreamController<String>.broadcast();
-  Sink<String> get tgSdEditChanged => _tgSdController.sink;
-  Stream<String> get tgSdEdit => _tgSdController.stream;
+  Sink<String> get usedTimeEditChanged => _usedTimeController.sink;
+  Stream<String> get usedTimeEdit => _usedTimeController.stream;
 
-  final StreamController<String> _soLuongController =
+  final StreamController<String> _amountController =
       StreamController<String>.broadcast();
-  Sink<String> get soLuongEditChanged => _soLuongController.sink;
-  Stream<String> get soLuongEdit => _soLuongController.stream;
+  Sink<String> get amountEditChanged => _amountController.sink;
+  Stream<String> get amountEdit => _amountController.stream;
 
-  final StreamController<String> _tenHdController =
+  final StreamController<String> _contractNameController =
       StreamController<String>.broadcast();
-  Sink<String> get tenHdEditChanged => _tenHdController.sink;
-  Stream<String> get tenHdEdit => _tenHdController.stream;
+  Sink<String> get contractNameEditChanged => _contractNameController.sink;
+  Stream<String> get contractNameEdit => _contractNameController.stream;
 
-  final StreamController<String> _mdsdController =
+  final StreamController<String> _purposeOfUsingController =
       StreamController<String>.broadcast();
-  Sink<String> get mdsdEditChanged => _mdsdController.sink;
-  Stream<String> get mdsdEdit => _mdsdController.stream;
+  Sink<String> get purposeOfUsingEditChanged => _purposeOfUsingController.sink;
+  Stream<String> get purposeOfUsingEdit => _purposeOfUsingController.stream;
 
-  final StreamController<String> _maQrController =
+  final StreamController<String> _qrCodeController =
       StreamController<String>.broadcast();
-  Sink<String> get maQrEditChanged => _maQrController.sink;
-  Stream<String> get maQrEdit => _maQrController.stream;
+  Sink<String> get qrCodeEditChanged => _qrCodeController.sink;
+  Stream<String> get qrCodeEdit => _qrCodeController.stream;
 
   final StreamController<String> _saveController =
       StreamController<String>.broadcast();
   Sink<String> get saveEditChanged => _saveController.sink;
   Stream<String> get saveEdit => _saveController.stream;
 
-  final StreamController<String> _khauHaoController =
+  final StreamController<String> _depreciationController =
       StreamController<String>.broadcast();
-  Sink<String> get khauHaoEditChanged => _khauHaoController.sink;
-  Stream<String> get khauHaoEdit => _khauHaoController.stream;
+  Sink<String> get depreciationEditChanged => _depreciationController.sink;
+  Stream<String> get depreciationEdit => _depreciationController.stream;
+
+  final StreamController<String> _responseController =
+      StreamController<String>.broadcast();
+  Sink<String> get responseEditChanged => _responseController.sink;
+  Stream<String> get responseEdit => _responseController.stream;
 
   _startEditListeners() async {
-    _tenTsController.stream.listen((tenTs) {
-      selectAsset.Ten_ts = tenTs;
+    _nameAssetController.stream.listen((nameAsset) {
+      selectAsset.nameAsset = nameAsset;
     });
-    _maPbController.stream.listen((maPb) {
-      selectAsset.Ma_pb = maPb;
+    _idDepartmentController.stream.listen((idDepartment) {
+      selectAsset.idDepartment = idDepartment;
     });
-    _tenPbController.stream.listen((tenPb) {
-      selectAsset.Ten_pb = tenPb;
+    _departmentNameController.stream.listen((departmentName) {
+      selectAsset.departmentName = departmentName;
     });
-    _namSXController.stream.listen((namSx) {
-      selectAsset.Nam_sx = namSx;
+    _yearOfManufactureController.stream.listen((yearOfManufacture) {
+      selectAsset.yearOfManufacture = yearOfManufacture;
     });
-    _nuocSxController.stream.listen((nuocSx) {
-      selectAsset.Nuoc_sx = nuocSx;
+    _producingCountryController.stream.listen((producingCountry) {
+      selectAsset.producingCountry = producingCountry;
     });
-    _ntsController.stream.listen((nts) {
-      selectAsset.Ten_nts = nts;
+    _assetGroupNameController.stream.listen((assetGroupName) {
+      selectAsset.assetGroupName = assetGroupName;
     });
-    _ngayBDController.stream.listen((ngayBD) {
-      ngay_BD = ngayBD;
+    _starDateController.stream.listen((starDate) {
+      selectAsset.starDate = starDate;
     });
-    _ngayKTController.stream.listen((ngayKT) {
-      ngay_KT = ngayKT;
+    _endDateController.stream.listen((endDate) {
+      selectAsset.endDate = endDate;
     });
-    _TinhTrangController.stream.listen((TinhTrang) {
-      selectAsset.Tinh_trang = TinhTrang;
+    _statusController.stream.listen((status) {
+      selectAsset.status = status;
     });
-    _nguyenGiaController.stream.listen((nguyenGia) {
-      selectAsset.Nguyen_gia = nguyenGia;
+    _originalPriceController.stream.listen((originalPrice) {
+      selectAsset.originalPrice = originalPrice;
     });
-    _tgSdController.stream.listen((tgSd) {
-      selectAsset.Tg_sd = tgSd;
+    _usedTimeController.stream.listen((usedTime) {
+      selectAsset.usedTime = usedTime;
     });
-    _soLuongController.stream.listen((soLuong) {
-      selectAsset.So_luong = soLuong;
+    _amountController.stream.listen((amount) {
+      selectAsset.amount = amount;
     });
-    _tenHdController.stream.listen((Hd) {
-      selectAsset.Ten_hd = Hd;
+    _contractNameController.stream.listen((contractName) {
+      selectAsset.contractName = contractName;
     });
-    _mdsdController.stream.listen((mdsd) {
-      selectAsset.Mdsd = mdsd;
+    _purposeOfUsingController.stream.listen((purposeOfUsing) {
+      selectAsset.purposeOfUsing = purposeOfUsing;
     });
-    _maQrController.stream.listen((maQr) {
-      selectAsset.Ma_qr = maQr;
+    _qrCodeController.stream.listen((qrCode) {
+      selectAsset.qrCode = qrCode;
     });
-    _khauHaoController.stream.listen((KH) {
-      khauHao = KH;
+    _depreciationController.stream.listen((depreciation) {
+      selectAsset.depreciation = depreciation;
     });
     _saveController.stream.listen((action) {
       if (action == "Save") {
         _saveAssets();
       } else if (action == "Add") {
         _addAssets();
+      } else if (action == DomainProvider.CONVERT_ASSET_ALL) {
+        _convertAsset(true);
       }
     });
   }
 
-  void _getAssets(bool add, Assets asset) {
+  void _getAssets(bool add, AssetsModel asset) {
     if (add) {
-      selectAsset = Assets();
-      selectAsset.Ten_ts = asset.Ten_ts;
-      selectAsset.Ma_pb = asset.Ma_pb;
-      selectAsset.Ten_pb = asset.Ten_pb;
-      selectAsset.Nam_sx = DateTime.now().toString();
-      selectAsset.Nuoc_sx = asset.Nuoc_sx;
-      selectAsset.Ten_nts = asset.Ten_nts;
-      selectAsset.Tinh_trang = asset.Tinh_trang;
-      selectAsset.Nguyen_gia = asset.Nguyen_gia;
-      selectAsset.Tg_sd = asset.Tg_sd;
-      selectAsset.So_luong = asset.So_luong;
-      selectAsset.Ten_hd = asset.Ten_hd;
-      selectAsset.Mdsd = asset.Mdsd;
-      selectAsset.Ma_qr = DateTime.now().toString();
-      selectAsset.Uid = asset.Uid;
+      selectAsset = AssetsModel();
+      selectAsset.documentID = asset.documentID;
+      selectAsset.nameAsset = asset.nameAsset;
+      selectAsset.idDepartment = asset.idDepartment;
+      selectAsset.departmentName = asset.departmentName;
+      selectAsset.yearOfManufacture = asset.yearOfManufacture;
+      selectAsset.producingCountry = asset.producingCountry;
+      selectAsset.assetGroupName = asset.assetGroupName;
+      selectAsset.starDate = asset.starDate;
+      selectAsset.status = asset.status;
+      selectAsset.originalPrice = asset.originalPrice;
+      selectAsset.usedTime = asset.usedTime;
+      selectAsset.amount = asset.amount;
+      selectAsset.contractName = asset.contractName;
+      selectAsset.purposeOfUsing = asset.purposeOfUsing;
+      selectAsset.qrCode = asset.qrCode;
+      selectAsset.userId = asset.userId;
+      selectAsset.starDate = asset.starDate;
+      selectAsset.endDate = asset.endDate;
+      selectAsset.depreciation = asset.depreciation;
+      // selectAsset.nameAsset = '';
+      // selectAsset.idDepartment = '';
+      // selectAsset.departmentName = '';
+      // selectAsset.yearOfManufacture = DateTime.now().toString();
+      // selectAsset.producingCountry = '';
+      // selectAsset.assetGroupName = '';
+      // selectAsset.status = 'Đang Sử Dụng';
+      // selectAsset.starDate = DateTime.now().toString();
+      // selectAsset.originalPrice = '0.0';
+      // selectAsset.usedTime = '12';
+      // selectAsset.amount = '';
+      // selectAsset.contractName = '';
+      // selectAsset.purposeOfUsing = '';
+      // selectAsset.qrCode = DateTime.now().toString();
+      // selectAsset.userId = userId;
+      // selectAsset.starDate = DateTime.now().toString();
+      // selectAsset.endDate = Alert.addMonth(12, DateTime.now().toString());
+      // selectAsset.depreciation = '';
     } else {
-      selectAsset.Ten_ts = asset.Ten_ts;
-      selectAsset.Ma_pb = asset.Ma_pb;
-      selectAsset.Ten_pb = asset.Ten_pb;
-      selectAsset.Nam_sx = asset.Nam_sx;
-      selectAsset.Nuoc_sx = asset.Nuoc_sx;
-      selectAsset.Ten_nts = asset.Ten_nts;
-      selectAsset.Tinh_trang = asset.Tinh_trang;
-      selectAsset.Nguyen_gia = asset.Nguyen_gia;
-      selectAsset.Tg_sd = asset.Tg_sd;
-      selectAsset.So_luong = asset.So_luong;
-      selectAsset.Ten_hd = asset.Ten_hd;
-      selectAsset.Mdsd = asset.Mdsd;
-      selectAsset.Ma_qr = asset.Ma_qr;
-      selectAsset.Uid = asset.Uid;
+      selectAsset.nameAsset = asset.nameAsset;
+      selectAsset.idDepartment = asset.idDepartment;
+      selectAsset.departmentName = asset.departmentName;
+      selectAsset.yearOfManufacture = asset.yearOfManufacture;
+      selectAsset.producingCountry = asset.producingCountry;
+      selectAsset.assetGroupName = asset.assetGroupName;
+      selectAsset.starDate = asset.starDate;
+      selectAsset.status = selectAsset.status;
+      selectAsset.originalPrice = asset.originalPrice;
+      selectAsset.usedTime = asset.usedTime;
+      selectAsset.amount = asset.amount;
+      selectAsset.contractName = asset.contractName;
+      selectAsset.purposeOfUsing = asset.purposeOfUsing;
+      selectAsset.qrCode = asset.qrCode;
+      selectAsset.userId = asset.userId;
+      selectAsset.starDate = asset.starDate;
+      selectAsset.endDate = asset.endDate;
+      selectAsset.depreciation = asset.depreciation;
     }
-    tenTsEditChanged.add(selectAsset.Ten_ts ?? "");
-    maPbEditChanged.add(selectAsset.Ma_pb ?? "");
-    tenPbEditChanged.add(selectAsset.Ten_pb ?? "");
-    namSXEditChanged.add(selectAsset.Nam_sx ?? "");
-    nuocSxEditChanged.add(selectAsset.Nuoc_sx ?? "");
-    NtsEditChanged.add(selectAsset.Ten_nts ?? "");
-    TinhTrangEditChanged.add(selectAsset.Tinh_trang ?? "");
-    nguyenGiaEditChanged.add(selectAsset.Nguyen_gia ?? "");
-    tgSdEditChanged.add(selectAsset.Tg_sd ?? "");
-    soLuongEditChanged.add(selectAsset.So_luong ?? "");
-    tenHdEditChanged.add(selectAsset.Ten_hd ?? "");
-    mdsdEditChanged.add(selectAsset.Mdsd ?? "");
-    maQrEditChanged.add(selectAsset.Ma_qr ?? "");
+
+    nameAssetEditChanged.add(selectAsset.nameAsset ?? "");
+    idDepartmentEditChanged.add(selectAsset.idDepartment ?? "");
+    departmentNameEditChanged.add(selectAsset.departmentName ?? "");
+    yearOfManufactureEditChanged.add(selectAsset.yearOfManufacture ?? "");
+    producingCountryEditChanged.add(selectAsset.producingCountry ?? "");
+    assetGroupNameEditChanged.add(selectAsset.assetGroupName ?? "");
+    statusEditChanged.add(selectAsset.status ?? "");
+    originalPriceEditChanged.add(selectAsset.originalPrice ?? "");
+    usedTimeEditChanged.add(selectAsset.usedTime ?? "");
+    amountEditChanged.add(selectAsset.amount ?? "");
+    contractNameEditChanged.add(selectAsset.contractName ?? "");
+    purposeOfUsingEditChanged.add(selectAsset.purposeOfUsing ?? "");
+    endDateEditChanged.add(selectAsset.endDate ?? "");
+    starDateEditChanged.add(selectAsset.starDate ?? "");
   }
 
-  void _saveAssets() {
-    maPb = displayName!.length > 20 ? displayName!.substring(0, 20) : '';
-    name = displayName!.length > 20
-        ? displayName!.substring(21, displayName!.length)
-        : displayName!;
-    Assets assets = Assets(
+  void _saveAssets() async {
+    maPb = displayName.length > 20 ? displayName.substring(0, 20) : '';
+    name = displayName.length > 20
+        ? displayName.substring(21, displayName.length)
+        : displayName;
+    AssetsModel assets = AssetsModel(
       documentID: selectAsset.documentID,
-      Ten_ts: selectAsset.Ten_ts,
-      Ma_pb: selectAsset.Ma_pb,
-      Ten_pb: selectAsset.Ten_pb,
-      Nam_sx: selectAsset.Nam_sx,
-      Nuoc_sx: selectAsset.Nuoc_sx,
-      Ten_nts: selectAsset.Ten_nts,
-      Tinh_trang: selectAsset.Tinh_trang,
-      Nguyen_gia: selectAsset.Nguyen_gia,
-      Tg_sd: selectAsset.Tg_sd,
-      So_luong: selectAsset.So_luong,
-      Ten_hd: selectAsset.Ten_hd,
-      Mdsd: selectAsset.Mdsd,
-      Ma_qr: selectAsset.Ma_qr,
-      Uid: selectAsset.Uid,
+      nameAsset: selectAsset.nameAsset,
+      idDepartment: selectAsset.idDepartment,
+      departmentName: selectAsset.departmentName,
+      yearOfManufacture: selectAsset.yearOfManufacture,
+      producingCountry: selectAsset.producingCountry,
+      assetGroupName: selectAsset.assetGroupName,
+      status: selectAsset.status,
+      originalPrice: selectAsset.originalPrice,
+      usedTime: selectAsset.usedTime,
+      amount: selectAsset.amount,
+      contractName: selectAsset.contractName,
+      purposeOfUsing: selectAsset.purposeOfUsing,
+      qrCode: selectAsset.qrCode,
+      userId: userId,
+      starDate: selectAsset.starDate,
+      endDate: selectAsset.endDate,
+      dateCreate: DateTime.now().toString(),
+      depreciation: selectAsset.depreciation,
     );
-    LichSuSuDung lichSuSuDung = LichSuSuDung(
-        documentID: selectAsset.Ma_qr,
-        Ten_ts: selectAsset.Ten_ts,
-        Ten_pb: selectAsset.Ten_pb,
-        Nam_sx: selectAsset.Nam_sx,
-        Nuoc_sx: selectAsset.Nuoc_sx,
-        Ma_nts: selectAsset.Ten_nts,
-        Ma_tinh_trang: selectAsset.Tinh_trang,
-        Nguyen_gia: selectAsset.Nguyen_gia,
-        Tg_sd: selectAsset.Tg_sd,
-        So_luong: selectAsset.So_luong,
-        So_hd: selectAsset.Ten_hd,
-        Mdsd: selectAsset.Mdsd,
-        Ma_qr: selectAsset.Ma_qr,
-        Name: name,
-        Email: email ?? "",
-        Thgian: DateTime.now().toString());
-
-    SoTheoDoi soTheoDoi = SoTheoDoi(
-        Ma_qr: selectAsset.Ma_qr,
-        Ten_ts: selectAsset.Ten_ts,
-        Ma_pb: selectAsset.Ma_pb,
-        Tg_sd: selectAsset.Tg_sd,
-        Nguyen_gia: selectAsset.Nguyen_gia,
-        Ngay_BD: ngay_BD ?? "",
-        Ngay_KT: ngay_KT ?? "",
-        Ly_do: "Thêm Mới",
-        Khau_hao: khauHao ?? "",
-        Name: name,
-        Email: email ?? "",
-        Thgian: DateTime.now().toString());
-
     if (add) {
-      dbApi.addAssets(assets);
-      dbSTDApi.addSoTheoDoi(soTheoDoi);
+      String responseAddAsset = await dbApi.addAssets(assets: assets);
+      if (responseAddAsset != "" && responseAddAsset.isNotEmpty == true) {
+        DiaryModel diary = DiaryModel(
+            documentID: selectAsset.qrCode,
+            nameAsset: selectAsset.nameAsset,
+            idAsset: responseAddAsset,
+            idDepartment: selectAsset.idDepartment,
+            originalPrice: selectAsset.originalPrice,
+            usedTime: selectAsset.usedTime,
+            qrCode: selectAsset.qrCode,
+            starDate: selectAsset.starDate,
+            endDate: selectAsset.endDate,
+            dateCreate: DateTime.now().toString(),
+            depreciation: selectAsset.depreciation,
+            userName: name,
+            userEmail: email,
+            dateUpdate: DateTime.now().toString(),
+            detail: "Thêm Mới");
+        String responseAddDiary = await dbDiaryApi.addDiaryModel(diary);
+        HistoryAssetModel historyAssetModel = HistoryAssetModel(
+          documentID: selectAsset.qrCode,
+          nameAsset: selectAsset.nameAsset,
+          idAsset: responseAddAsset,
+          idDepartment: selectAsset.idDepartment,
+          departmentName: selectAsset.departmentName,
+          yearOfManufacture: selectAsset.yearOfManufacture,
+          producingCountry: selectAsset.producingCountry,
+          assetGroupName: selectAsset.assetGroupName,
+          status: selectAsset.status,
+          originalPrice: selectAsset.originalPrice,
+          usedTime: selectAsset.usedTime,
+          amount: selectAsset.amount,
+          contractName: selectAsset.contractName,
+          purposeOfUsing: selectAsset.purposeOfUsing,
+          qrCode: selectAsset.qrCode,
+          userId: userId,
+          starDate: selectAsset.starDate,
+          endDate: selectAsset.endDate,
+          dateCreate: DateTime.now().toString(),
+          depreciation: selectAsset.depreciation,
+          userName: name,
+          userEmail: email,
+          dateUpdate: DateTime.now().toString(),
+        );
+        dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
+        if (responseAddDiary != "" && responseAddDiary.isNotEmpty == true) {
+          responseEditChanged.add(DomainProvider.SUCCESS);
+        } else {
+          responseEditChanged.add(DomainProvider.ERROR);
+        }
+      } else {
+        responseEditChanged.add(DomainProvider.ERROR);
+      }
     } else {
-      dbApi.updateAssetWithTransaction(assets);
+      final responseAsset =
+          await dbApi.updateAssetWithTransaction(assets: assets);
+      if (responseAsset == DomainProvider.SUCCESS) {
+        HistoryAssetModel historyAssetModel = HistoryAssetModel(
+          nameAsset: selectAsset.nameAsset,
+          idAsset: selectAsset.documentID,
+          idDepartment: selectAsset.idDepartment,
+          departmentName: selectAsset.departmentName,
+          yearOfManufacture: selectAsset.yearOfManufacture,
+          producingCountry: selectAsset.producingCountry,
+          assetGroupName: selectAsset.assetGroupName,
+          status: selectAsset.status,
+          originalPrice: selectAsset.originalPrice,
+          usedTime: selectAsset.usedTime,
+          amount: selectAsset.amount,
+          contractName: selectAsset.contractName,
+          purposeOfUsing: selectAsset.purposeOfUsing,
+          qrCode: selectAsset.qrCode,
+          userId: selectAsset.userId,
+          starDate: selectAsset.starDate,
+          endDate: selectAsset.endDate,
+          depreciation: selectAsset.depreciation,
+          userName: name,
+          userEmail: email,
+          dateUpdate: DateTime.now().toString(),
+          dateCreate: selectAsset.dateCreate,
+        );
+        final responseHistory =
+            await dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
+        if (responseHistory != "" && responseHistory.isNotEmpty == true) {
+          responseEditChanged.add(DomainProvider.SUCCESS);
+        } else {
+          responseEditChanged.add(DomainProvider.ERROR);
+        }
+      } else {
+        responseEditChanged.add(DomainProvider.ERROR);
+      }
     }
-    dbLSSDApi.addLichSuSuDung(lichSuSuDung);
   }
 
-  void _addAssets() {
-    Assets assets = Assets(
+  void _addAssets() async {
+    AssetsModel assets = AssetsModel(
       documentID: selectAsset.documentID,
-      Ten_ts: selectAsset.Ten_ts,
-      Ma_pb: selectAsset.Ma_pb,
-      Ten_pb: selectAsset.Ten_pb,
-      Nam_sx: selectAsset.Nam_sx,
-      Nuoc_sx: selectAsset.Nuoc_sx,
-      Ten_nts: selectAsset.Ten_nts,
-      Tinh_trang: selectAsset.Tinh_trang,
-      Nguyen_gia: selectAsset.Nguyen_gia,
-      Tg_sd: selectAsset.Tg_sd,
-      So_luong: selectAsset.So_luong,
-      Ten_hd: selectAsset.Ten_hd,
-      Mdsd: selectAsset.Mdsd,
-      Ma_qr: selectAsset.Ma_qr,
-      Uid: selectAsset.Uid,
+      nameAsset: selectAsset.nameAsset,
+      idDepartment: selectAsset.idDepartment,
+      departmentName: selectAsset.departmentName,
+      yearOfManufacture: selectAsset.yearOfManufacture,
+      producingCountry: selectAsset.producingCountry,
+      assetGroupName: selectAsset.assetGroupName,
+      status: selectAsset.status,
+      originalPrice: selectAsset.originalPrice,
+      usedTime: selectAsset.usedTime,
+      amount: selectAsset.amount,
+      contractName: selectAsset.contractName,
+      purposeOfUsing: selectAsset.purposeOfUsing,
+      qrCode: selectAsset.qrCode,
+      userId: selectAsset.userId,
+      starDate: selectAsset.starDate,
+      endDate: selectAsset.endDate,
+      depreciation: selectAsset.depreciation,
+      dateCreate: DateTime.now().toString(),
     );
-    dbApi.addAssets(assets);
+    String responseAddAsset = await dbApi.addAssets(assets: assets);
+
+    if (responseAddAsset != "" && responseAddAsset.isNotEmpty == true) {
+      responseEditChanged.add(DomainProvider.SUCCESS);
+    } else {
+      responseEditChanged.add(DomainProvider.ERROR);
+    }
+  }
+
+  void _convertAsset(bool isAll) async {
+    if (isAll) {
+      final AssetsModel convertAsset = AssetsModel(
+        documentID: selectAsset.documentID,
+        nameAsset: selectAsset.nameAsset,
+        idDepartment: selectAsset.idDepartment,
+        departmentName: selectAsset.departmentName,
+        yearOfManufacture: selectAsset.yearOfManufacture,
+        producingCountry: selectAsset.producingCountry,
+        assetGroupName: selectAsset.assetGroupName,
+        status: selectAsset.status,
+        originalPrice: selectAsset.originalPrice,
+        usedTime: selectAsset.usedTime,
+        amount: selectAsset.amount,
+        contractName: selectAsset.contractName,
+        purposeOfUsing: selectAsset.purposeOfUsing,
+        qrCode: selectAsset.qrCode,
+        userId: userId,
+        starDate: selectAsset.starDate,
+        endDate: selectAsset.endDate,
+        dateCreate: selectAsset.dateCreate,
+        depreciation: selectAsset.depreciation,
+      );
+
+      final responseAsset = await dbApi.updateAsset(assets: convertAsset);
+      if (responseAsset == DomainProvider.SUCCESS) {
+        HistoryAssetModel historyAssetModel = HistoryAssetModel(
+          nameAsset: selectAsset.nameAsset,
+          idAsset: selectAsset.documentID,
+          idDepartment: selectAsset.idDepartment,
+          departmentName: selectAsset.departmentName,
+          yearOfManufacture: selectAsset.yearOfManufacture,
+          producingCountry: selectAsset.producingCountry,
+          assetGroupName: selectAsset.assetGroupName,
+          status: selectAsset.status,
+          originalPrice: selectAsset.originalPrice,
+          usedTime: selectAsset.usedTime,
+          amount: selectAsset.amount,
+          contractName: selectAsset.contractName,
+          purposeOfUsing: selectAsset.purposeOfUsing,
+          qrCode: selectAsset.qrCode,
+          userId: selectAsset.userId,
+          starDate: selectAsset.starDate,
+          endDate: selectAsset.endDate,
+          depreciation: selectAsset.depreciation,
+          userName: name,
+          userEmail: email,
+          dateUpdate: DateTime.now().toString(),
+        );
+        final responseHistory =
+            await dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
+        if (responseHistory != "" && responseHistory.isNotEmpty == true) {
+          responseEditChanged.add(DomainProvider.SUCCESS);
+        } else {
+          responseEditChanged.add(DomainProvider.ERROR);
+        }
+      } else {
+        responseEditChanged.add(DomainProvider.ERROR);
+      }
+    }
   }
 
   void dispose() {
-    _tenTsController.close();
-    _maPbController.close();
-    _namSXController.close();
-    _nuocSxController.close();
-    _ntsController.close();
-    _TinhTrangController.close();
-    _nguyenGiaController.close();
-    _ngayBDController.close();
-    _ngayKTController.close();
-    _tgSdController.close();
-    _soLuongController.close();
-    _tenHdController.close();
-    _mdsdController.close();
-    _maQrController.close();
+    _nameAssetController.close();
+    _idDepartmentController.close();
+    _yearOfManufactureController.close();
+    _producingCountryController.close();
+    _assetGroupNameController.close();
+    _statusController.close();
+    _originalPriceController.close();
+    _starDateController.close();
+    _endDateController.close();
+    _usedTimeController.close();
+    _amountController.close();
+    _contractNameController.close();
+    _purposeOfUsingController.close();
+    _qrCodeController.close();
     _saveController.close();
-    _khauHaoController.close();
-    _tenPbController.close();
+    _depreciationController.close();
+    _departmentNameController.close();
+    _responseController.close();
   }
 }

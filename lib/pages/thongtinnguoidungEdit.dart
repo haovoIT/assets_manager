@@ -224,7 +224,6 @@ class _ThongTinNguoiDungState extends State<ThongTinNguoiDung> {
                                   setState(() {
                                     flags = true;
                                   });
-                                  deleteImage(picture);
                                 },
                                 child: Text(
                                   "OK",

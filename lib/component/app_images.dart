@@ -1,7 +1,8 @@
 class AppImages {
   AppImages._();
 
-  static final String bgAuthentication = 'assets/images/background.png';
+  //static final String bgAuthentication = 'assets/images/background.png';
+  static final String bgAuthentication = 'assets/images/backgroundGreen.png';
 
   static final String icLauncherRound = 'assets/images/ic_launcher_round.png';
 
@@ -10,4 +11,5 @@ class AppImages {
 
   //logo
   static final String imLogo = 'assets/images/Logo.png';
+  static final String imTitle = 'assets/images/img.png';
 }

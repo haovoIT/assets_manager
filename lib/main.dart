@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        bottomAppBarColor: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
       home: IntroPageWithMotion(),

@@ -27,6 +27,7 @@ class AuthenticationServer implements AuthenticationApi {
         email: email,
         password: password,
       );
+      print(response);
       return response;
     } catch (e) {
       if (e.toString().contains("firebase_auth/user-not-found")) {
@@ -43,6 +44,7 @@ class AuthenticationServer implements AuthenticationApi {
         context: context,
       );
     }
+    return null;
   }
 
   @override
@@ -62,6 +64,7 @@ class AuthenticationServer implements AuthenticationApi {
           buttonText: CommonString.CANCEL,
           context: context);
     }
+    return null;
   }
 
   @override
@@ -88,6 +91,7 @@ class AuthenticationServer implements AuthenticationApi {
           buttonText: CommonString.CANCEL,
           context: context);
     }
+    return null;
   }
 
   @override
@@ -106,5 +110,6 @@ class AuthenticationServer implements AuthenticationApi {
           buttonText: CommonString.CANCEL,
           context: context);
     }
+    return null;
   }
 }

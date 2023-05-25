@@ -8,7 +8,6 @@ import 'package:assets_manager/component/shared_preferences.dart';
 import 'package:assets_manager/global_widget/password_custom.dart';
 import 'package:assets_manager/global_widget/text_field_login.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
@@ -24,6 +23,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> with SharedPreferencesManager {
   LoginBloc? loginBloc;
   bool _showPass = false;
+  String email = "";
   TextEditingController resetEmailController = new TextEditingController();
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
@@ -37,15 +37,16 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
   }
 
   onInit() async {
-    emailController.text =
-        await sharedPreferencesGet(SharedPreferencesKey.EMAIL);
-
     loginBloc = LoginBloc(
       context: context,
       authenticationApi: AuthenticationServer(context),
     );
 
-    loginBloc?.emailChanged.add(emailController.text);
+    email = await sharedPreferencesGet(SharedPreferencesKey.EMAIL);
+    if (email != "null") {
+      emailController.text = email;
+      loginBloc?.emailChanged.add(emailController.text);
+    }
 
     List<BiometricType> availableBiometrics =
         await auth.getAvailableBiometrics();
@@ -80,7 +81,6 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
         }
       }
     } on PlatformException catch (e) {
-      print(e);
       return;
     }
   }
@@ -248,7 +248,6 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
                   ),
                 ),
                 onPressed: () {
-                  print(snapshot.data);
                   if (snapshot.data == true) {
                     loginBloc?.loginOrCreateChanged
                         .add(DomainProvider.ACT_LOGIN);
@@ -300,7 +299,6 @@ class _LoginState extends State<Login> with SharedPreferencesManager {
                       color: Colors.red),
                 ),
                 onPressed: () async {
-                  print(snapshot.data);
                   if (snapshot.data == true) {
                     loginBloc?.loginOrCreateChanged
                         .add(DomainProvider.CREATE_ACCOUNT);

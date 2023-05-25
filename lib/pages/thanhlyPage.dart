@@ -7,7 +7,7 @@ import 'package:assets_manager/bloc/thanhly_edit_bloc_provider.dart';
 import 'package:assets_manager/inPDF/inPDF_ThongTinThanhLy.dart';
 import 'package:assets_manager/inPDF/pdf_api.dart';
 import 'package:assets_manager/models/thanhly.dart';
-import 'package:assets_manager/pages/khauhaoPage.dart';
+import 'package:assets_manager/pages/depreciation_page.dart';
 import 'package:assets_manager/pages/thanhlyEditPage.dart';
 import 'package:assets_manager/services/db_authentic.dart';
 import 'package:assets_manager/services/db_thanhly.dart';
@@ -228,8 +228,8 @@ class _ThanhLyPagesState extends State<ThanhLyPages> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => KhauHaoPage(
-                            ma: snapshot.data[index].documentID,
+                      builder: (context) => Depreciation(
+                            idAsset: snapshot.data[index].documentID,
                             flag: 2,
                           )));
             } else if (direction.toString() == "DismissDirection.startToEnd") {

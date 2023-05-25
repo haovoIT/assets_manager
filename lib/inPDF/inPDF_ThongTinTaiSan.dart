@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/taisan.dart';
+import 'package:assets_manager/models/asset_model.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -9,7 +9,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 
 class PdfThongTinTSApi {
-  static Future<File> generate(Assets assets, String email, String name) async {
+  static Future<File> generate(
+      AssetsModel assets, String email, String name) async {
     final myThem = ThemeData.withFont(
       base: Font.ttf(
           await rootBundle.load("assets/Open_Sans/OpenSans-Regular.ttf")),
@@ -37,10 +38,10 @@ class PdfThongTinTSApi {
       footer: (pw.Context context) => buildFooter(email),
     ));
 
-    return PdfApi.saveDocument(name: "${assets.Ten_ts}.pdf", pdf: pdf);
+    return PdfApi.saveDocument(name: "${assets.nameAsset}.pdf", pdf: pdf);
   }
 
-  static pw.Widget buildHeader(Assets assets, String name, String email) =>
+  static pw.Widget buildHeader(AssetsModel assets, String name, String email) =>
       pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
@@ -76,7 +77,7 @@ class PdfThongTinTSApi {
         ],
       );
 
-  static pw.Widget buildTitle(Assets assets) => pw.Column(
+  static pw.Widget buildTitle(AssetsModel assets) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         mainAxisAlignment: pw.MainAxisAlignment.center,
         children: [
@@ -99,7 +100,7 @@ class PdfThongTinTSApi {
             width: 150,
             child: pw.BarcodeWidget(
               barcode: pw.Barcode.qrCode(),
-              data: assets.Ma_qr ?? "",
+              data: assets.qrCode ?? "",
             ),
           ),
           pw.SizedBox(height: 0.5 * PdfPageFormat.cm),
@@ -111,20 +112,21 @@ class PdfThongTinTSApi {
         ],
       );
 
-  static pw.Widget buildAsset(Assets assets) {
-    String _title = assets.Ten_ts ?? "";
-    String _subtilte = assets.Ten_pb ?? "";
-    String _namsx = assets.Nam_sx != null
-        ? DateFormat('dd/MM/yyyy').format(DateTime.parse(assets.Nam_sx!))
+  static pw.Widget buildAsset(AssetsModel assets) {
+    String _title = assets.nameAsset ?? "";
+    String _subtilte = assets.departmentName ?? "";
+    String _namsx = assets.yearOfManufacture != null
+        ? DateFormat('dd/MM/yyyy')
+            .format(DateTime.parse(assets.yearOfManufacture!))
         : "";
-    String _nuocsx = assets.Nuoc_sx ?? "";
-    String _nts = assets.Ten_nts ?? "";
-    String _tt = assets.Tinh_trang ?? "";
-    String _ng = assets.Nguyen_gia ?? "";
-    String _tg = assets.Tg_sd ?? "" + ' Tháng';
-    String _sl = assets.So_luong ?? "";
-    String _hd = assets.Ten_hd ?? "";
-    String _md = assets.Mdsd ?? "";
+    String _nuocsx = assets.producingCountry ?? "";
+    String _nts = assets.assetGroupName ?? "";
+    String _tt = assets.status ?? "";
+    String _ng = assets.originalPrice ?? "";
+    String _tg = assets.usedTime ?? "" + ' Tháng';
+    String _sl = assets.amount ?? "";
+    String _hd = assets.contractName ?? "";
+    String _md = assets.purposeOfUsing ?? "";
     return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         mainAxisAlignment: pw.MainAxisAlignment.center,

@@ -1,15 +1,16 @@
 import 'dart:io';
+
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/taisan.dart';
+import 'package:assets_manager/models/asset_model.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart';
 
 class PdfBCTTApi {
   static Future<File> generate(
-    List<Assets> list,
+    List<AssetsModel> list,
     String email,
     String name,
     int dangSD,
@@ -38,14 +39,8 @@ class PdfBCTTApi {
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
         buildTitle(),
         buildTable(list, 0),
-        buildEnd(
-          list.length.toString(),
-          dangSD,
-          ngungSD,
-          huHong,
-          matMat,
-          list.length
-        ),
+        buildEnd(list.length.toString(), dangSD, ngungSD, huHong, matMat,
+            list.length),
         pw.SizedBox(height: 1 * PdfPageFormat.cm),
         //pw.Divider(),
       ],
@@ -112,7 +107,7 @@ class PdfBCTTApi {
         ],
       );
 
-  static pw.Widget buildTable(List<Assets> list, int index) {
+  static pw.Widget buildTable(List<AssetsModel> list, int index) {
     final headers = [
       'STT',
       'Tên Tài Sản',
@@ -130,17 +125,20 @@ class PdfBCTTApi {
     final data = list.map((item) {
       return [
         index = index + 1,
-        item.Ten_ts,
-        item.Ten_pb,
-        item.Nam_sx!= null?DateFormat('dd/MM/yyyy').format(DateTime.parse(item.Nam_sx!)):"",
-        item.Nuoc_sx,
-        item.Ten_nts,
-        item.Nguyen_gia,
-        item.Tg_sd,
-        item.So_luong,
-        item.Ten_hd,
-        item.Mdsd,
-        item.Tinh_trang,
+        item.nameAsset,
+        item.departmentName,
+        item.yearOfManufacture != null
+            ? DateFormat('dd/MM/yyyy')
+                .format(DateTime.parse(item.yearOfManufacture!))
+            : "",
+        item.producingCountry,
+        item.assetGroupName,
+        item.originalPrice,
+        item.usedTime,
+        item.amount,
+        item.contractName,
+        item.purposeOfUsing,
+        item.status,
       ];
     }).toList();
     return Table.fromTextArray(
@@ -169,8 +167,8 @@ class PdfBCTTApi {
     );
   }
 
-  static pw.Widget buildEnd(
-          String number, int dangSD, int ngungSD, int huHong, int matMat, int tong) =>
+  static pw.Widget buildEnd(String number, int dangSD, int ngungSD, int huHong,
+          int matMat, int tong) =>
       pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.center,
@@ -184,10 +182,14 @@ class PdfBCTTApi {
                       style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
                           fontStyle: pw.FontStyle.italic)),
-                  pw.Text("\t\t\t- Đang Sử Dụng: $dangSD, chiếm ${((dangSD/tong)*100).toInt()}%."),
-                  pw.Text("\t\t\t- Ngừng Sử Dụng: $ngungSD, chiếm ${((ngungSD/tong)*100).toInt()}%."),
-                  pw.Text("\t\t\t- Hư Hỏng: $huHong, chiếm ${((huHong/tong)*100).toInt()}%."),
-                  pw.Text("\t\t\t- Mất Mát: $matMat, chiếm ${((matMat/tong)*100).toInt()}%.")
+                  pw.Text(
+                      "\t\t\t- Đang Sử Dụng: $dangSD, chiếm ${((dangSD / tong) * 100).toInt()}%."),
+                  pw.Text(
+                      "\t\t\t- Ngừng Sử Dụng: $ngungSD, chiếm ${((ngungSD / tong) * 100).toInt()}%."),
+                  pw.Text(
+                      "\t\t\t- Hư Hỏng: $huHong, chiếm ${((huHong / tong) * 100).toInt()}%."),
+                  pw.Text(
+                      "\t\t\t- Mất Mát: $matMat, chiếm ${((matMat / tong) * 100).toInt()}%.")
                 ]),
             pw.Column(
                 mainAxisAlignment: pw.MainAxisAlignment.center,
@@ -226,9 +228,9 @@ class PdfBCTTApi {
       mainAxisSize: pw.MainAxisSize.min,
       crossAxisAlignment: pw.CrossAxisAlignment.end,
       children: [
-        pw.Text(title??"", style: style),
+        pw.Text(title ?? "", style: style),
         pw.SizedBox(width: 2 * PdfPageFormat.mm),
-        pw.Text(value??""),
+        pw.Text(value ?? ""),
       ],
     );
   }
@@ -246,8 +248,8 @@ class PdfBCTTApi {
       width: width,
       child: pw.Row(
         children: [
-          pw.Expanded(child: pw.Text(title??"", style: style)),
-          pw.Text(value??"", style: unite ? style : null),
+          pw.Expanded(child: pw.Text(title ?? "", style: style)),
+          pw.Text(value ?? "", style: unite ? style : null),
         ],
       ),
     );
