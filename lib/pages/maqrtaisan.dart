@@ -107,7 +107,7 @@ class _TTTaiSanState extends State<TTTaiSan> {
         onPressed: () async {
           final pdfFile =
               await PdfDSTaiSanApi.generate(listAsset, email, name, "");
-          PdfApi.openFile(pdfFile);
+          PdfApi.openFile(pdfFile, context);
         },
         icon: Icon(Icons.outbox),
         label: Text("Xuất PDF"),
@@ -256,7 +256,7 @@ class _TTTaiSanState extends State<TTTaiSan> {
                                   userId: snapshot.data[index].userId);
                               final pdfFile = await PdfThongTinTSApi.generate(
                                   assets, email, name);
-                              PdfApi.openFile(pdfFile);
+                              PdfApi.openFile(pdfFile, context);
                             },
                             child: Text(
                               'IN PDF',

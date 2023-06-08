@@ -98,7 +98,7 @@ class _KiemKePagesState extends State<KiemKePages> {
                 keHoachKiemKeEditBloc?.saveEditChanged.add('Save');
                 final pdfFile =
                     await PdfPhieuKiemKeApi.generate(listAssets, email, name);
-                PdfApi.openFile(pdfFile);
+                PdfApi.openFile(pdfFile, context);
                 Navigator.pop(context);
               },
               icon: Icon(Icons.save))

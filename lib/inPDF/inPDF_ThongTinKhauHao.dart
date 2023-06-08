@@ -20,13 +20,12 @@ class PdfThongTinKHApi {
       String name) async {
     final myThem = ThemeData.withFont(
       base: Font.ttf(
-          await rootBundle.load("assets/Open_Sans/OpenSans-Regular.ttf")),
-      bold:
-          Font.ttf(await rootBundle.load("assets/Open_Sans/OpenSans-Bold.ttf")),
-      italic: Font.ttf(
-          await rootBundle.load("assets/Open_Sans/OpenSans-Italic.ttf")),
+          await rootBundle.load("assets/font/Tinos/Tinos-Regular.ttf")),
+      bold: Font.ttf(await rootBundle.load("assets/font/Tinos/Tinos-Bold.ttf")),
+      italic:
+          Font.ttf(await rootBundle.load("assets/font/Tinos/Tinos-Italic.ttf")),
       boldItalic: Font.ttf(
-          await rootBundle.load("assets/Open_Sans/OpenSans-BoldItalic.ttf")),
+          await rootBundle.load("assets/font/Tinos/Tinos-BoldItalic.ttf")),
     );
 
     final pdf = pw.Document(theme: myThem);
@@ -60,13 +59,15 @@ class PdfThongTinKHApi {
         buildTableKH(khauHao, luyKe, conLai),
         pw.SizedBox(height: 0.3 * PdfPageFormat.cm),
         buildEnd(),
-        //pw.Divider(),
+        pw.Divider(),
       ],
       footer: (pw.Context context) => buildFooter(email),
     ));
 
     return PdfApi.saveDocument(
-        name: "Khau_Hao_${assets.nameAsset}.pdf", pdf: pdf);
+        name:
+            "Khau_Hao_${assets.nameAsset}_${DateFormat("yyyy_MM_dd_HH_mm_ss").format(DateTime.now())}.pdf",
+        pdf: pdf);
   }
 
   static pw.Widget buildHeader(String name, String email) => pw.Column(
@@ -84,7 +85,7 @@ class PdfThongTinKHApi {
                       style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold, fontSize: 16)),
                   pw.Text(
-                      " Số 189 Nguyễn Oanh, Phường 10,\nQuận Gò Vấp, Thành phố Hồ Chí Minh",
+                      " Số 189 Nguyễn Oanh, Phường 10, Quận Gò Vấp, Thành phố Hồ Chí Minh",
                       style: pw.TextStyle(fontSize: 14),
                       textAlign: pw.TextAlign.center),
                 ],
@@ -147,7 +148,7 @@ class PdfThongTinKHApi {
             children: [
               pw.TableRow(children: [
                 pw.Column(children: [
-                  pw.Text('Mức Khấu Hao\n  Hàng Tháng',
+                  pw.Text('Mức Khấu Hao Hàng Tháng',
                       style: pw.TextStyle(
                           fontSize: 14, fontWeight: pw.FontWeight.bold))
                 ]),

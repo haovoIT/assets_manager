@@ -101,7 +101,7 @@ class _ThongKeThucTrangsState extends State<ThongKeThucTrangs> {
                   huHong,
                   matMat,
                 );
-                PdfApi.openFile(pdfFile);
+                PdfApi.openFile(pdfFile, context);
               },
               icon: Icon(
                 Icons.print,

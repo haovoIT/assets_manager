@@ -1,4 +1,3 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
 import 'package:assets_manager/component/index.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,15 +5,28 @@ import 'package:intl/intl.dart';
 class StartDate extends StatelessWidget {
   StartDate({
     Key? key,
-    this.assetsEditBloc,
+    required this.stream,
+    required this.sinkStartDate,
+    required this.sinkEndDate,
     required this.flagStartDate,
     required this.userTime,
-    required this.starDateController,
+    required this.startDateController,
+    /*this.sinkDepreciation,
+    this.numberMonths,
+    this.originalPrice,
+    this.accumulatedDouble,*/
   }) : super(key: key);
   bool flagStartDate;
   int userTime;
-  final AssetsEditBloc? assetsEditBloc;
-  final TextEditingController starDateController;
+  final Stream<String>? stream;
+  final Sink<String>? sinkStartDate;
+  final Sink<String>? sinkEndDate;
+  //final Sink<String>? sinkDepreciation;
+  final TextEditingController startDateController;
+
+  // final int? numberMonths;
+  // final String? originalPrice;
+  // final double? accumulatedDouble;
 
   @override
   Widget build(BuildContext context) {
@@ -31,26 +43,35 @@ class StartDate extends StatelessWidget {
         color: Colors.white,
       ),
       child: StreamBuilder(
-        stream: assetsEditBloc?.starDateEdit,
+        stream: stream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Container();
           }
 
-          starDateController.value =
-              starDateController.value.copyWith(text: snapshot.data);
+          startDateController.value =
+              startDateController.value.copyWith(text: snapshot.data);
 
           return GestureDetector(
             onTap: () async {
-              String _pickerDate = await Alert.selectDatetime(
-                context,
-                selectedDate: snapshot.data,
-                minTime: DateTime.parse(snapshot.data),
-              );
-              starDateController.text = _pickerDate;
-              assetsEditBloc?.starDateEditChanged.add(_pickerDate);
-              final endDate = Alert.addMonth(userTime, _pickerDate);
-              assetsEditBloc?.endDateEditChanged.add(endDate);
+              if (flagStartDate) {
+                String _pickerDate = await Alert.selectDatetime(
+                  context,
+                  selectedDate: snapshot.data,
+                  minTime: DateTime.parse(snapshot.data),
+                );
+                startDateController.text = _pickerDate;
+                sinkStartDate?.add(_pickerDate);
+                final endDate = Alert.addMonth(userTime, _pickerDate);
+                sinkEndDate?.add(endDate);
+                // final depreciationDouble = Alert.onChangeDepreciation(
+                //   userTimeInt: userTime,
+                //   numberMonths: numberMonths,
+                //   originalPrice: originalPrice,
+                //   accumulatedDouble: accumulatedDouble,
+                // );
+                // sinkDepreciation?.add(depreciationDouble.toInt().toVND());
+              }
             },
             child: Row(
               children: <Widget>[

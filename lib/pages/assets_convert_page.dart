@@ -1,19 +1,13 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
-import 'package:assets_manager/bloc/assets_edit_bloc_provider.dart';
-import 'package:assets_manager/bloc/home_bloc.dart';
+import 'package:assets_manager/bloc/bloc_index.dart';
 import 'package:assets_manager/classes/format_money.dart';
 import 'package:assets_manager/classes/validators.dart';
 import 'package:assets_manager/component/index.dart';
-import 'package:assets_manager/global_widget/appbar_custom.dart';
-import 'package:assets_manager/global_widget/button_custom.dart';
-import 'package:assets_manager/global_widget/custom_text_form_field.dart';
+import 'package:assets_manager/global_widget/global_widget_index.dart';
 import 'package:assets_manager/models/asset_model.dart';
 import 'package:assets_manager/pages/departmentList.dart';
 import 'package:assets_manager/pages/depreciation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import '../global_widget/asset_widget/index.dart';
 
 class AssetConvertPage extends StatefulWidget {
   final bool flag;
@@ -135,8 +129,8 @@ class _AssetConvertPageState extends State<AssetConvertPage> {
                 successMessage: AssetString.CONVERT_SUCCESS_MASSAGE,
                 errorMessage: AssetString.CONVERT_ERROR_MASSAGE,
                 context: context,
-                streamBuilder: _assetsEditBloc?.responseEdit,
-                sink: _assetsEditBloc?.responseEditChanged)
+                streamBuilder: _assetsEditBloc?.responseConvertEdit,
+                sink: _assetsEditBloc?.responseConvertEditChanged)
             .then((value) {
           if (value == DomainProvider.SUCCESS) {
             _homeBloc?.deleteAssets.add(widget.assetsModel);
@@ -147,7 +141,7 @@ class _AssetConvertPageState extends State<AssetConvertPage> {
                     builder: (context) => Depreciation(
                           idAsset: widget.assetsModel.documentID ?? "",
                           flag: 3,
-                          maPB: _idDepartment,
+                          idDepartment: _idDepartment,
                         )));
           }
         });
@@ -167,19 +161,25 @@ class _AssetConvertPageState extends State<AssetConvertPage> {
                 successMessage: AssetString.CONVERT_SUCCESS_MASSAGE,
                 errorMessage: AssetString.CONVERT_ERROR_MASSAGE,
                 context: context,
-                streamBuilder: _assetsEditBloc?.responseEdit,
-                sink: _assetsEditBloc?.responseEditChanged)
+                streamBuilder: _assetsEditBloc?.responseAddEdit,
+                sink: _assetsEditBloc?.responseAddEditChanged)
             .then((value) {
-          if (value == DomainProvider.SUCCESS) {
+          var response = value;
+          final data = response['data'];
+          final massage = response['massage'];
+          if (massage == DomainProvider.SUCCESS) {
             Navigator.pop(context);
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Depreciation(
-                          idAsset: widget.assetsModel.documentID ?? "",
-                          flag: 3,
-                          maPB: _idDepartment,
-                        )));
+              context,
+              MaterialPageRoute(
+                builder: (context) => Depreciation(
+                  idAsset: widget.assetsModel.documentID ?? "",
+                  newIdAsset: data,
+                  flag: 3,
+                  idDepartment: _idDepartment,
+                ),
+              ),
+            );
           }
         });
       }

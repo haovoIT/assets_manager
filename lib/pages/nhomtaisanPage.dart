@@ -131,7 +131,7 @@ class _NhomTaiSanPagesState extends State<NhomTaiSanPages> {
               onPressed: () async {
                 final pdfFile = await PdfDSNhomTaiSanApi.generate(
                     listNhomTaiSan, email, name);
-                PdfApi.openFile(pdfFile);
+                PdfApi.openFile(pdfFile, context);
               },
               icon: Icon(
                 Icons.print,

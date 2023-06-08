@@ -1,22 +1,11 @@
-import 'package:assets_manager/bloc/authentication_bloc.dart';
-import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
-import 'package:assets_manager/bloc/diary_bloc.dart';
-import 'package:assets_manager/bloc/diary_bloc_provider.dart';
-import 'package:assets_manager/bloc/diary_edit_bloc.dart';
-import 'package:assets_manager/bloc/diary_edit_bloc_provider.dart';
-import 'package:assets_manager/bloc/thanhly_edit_bloc.dart';
-import 'package:assets_manager/bloc/thanhly_edit_bloc_provider.dart';
+import 'package:assets_manager/bloc/bloc_index.dart';
+import 'package:assets_manager/component/index.dart';
+import 'package:assets_manager/global_widget/global_widget_index.dart';
 import 'package:assets_manager/inPDF/inPDF_ThongTinKhauHao.dart';
 import 'package:assets_manager/inPDF/pdf_api.dart';
-import 'package:assets_manager/models/asset_model.dart';
-import 'package:assets_manager/models/diary_model.dart';
-import 'package:assets_manager/models/thanhly.dart';
-import 'package:assets_manager/pages/nangcapPage.dart';
-import 'package:assets_manager/pages/thanhlyEditPage.dart';
-import 'package:assets_manager/pages/xacnhanthongtin.dart';
-import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_diary.dart';
-import 'package:assets_manager/services/db_thanhly.dart';
+import 'package:assets_manager/models/model_index.dart';
+import 'package:assets_manager/pages/page_index.dart';
+import 'package:assets_manager/services/service_index.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
@@ -24,18 +13,23 @@ import 'package:intl/intl.dart';
 
 class Depreciation extends StatelessWidget {
   final String idAsset;
+  final String? newIdAsset;
   final int flag;
-  final String? maPB;
+  final String? idDepartment;
 
   const Depreciation(
-      {Key? key, required this.idAsset, required this.flag, this.maPB})
+      {Key? key,
+      required this.idAsset,
+      required this.flag,
+      this.idDepartment,
+      this.newIdAsset})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final AuthenticationServer _authenticationserver =
+    final AuthenticationServer _authenticationServer =
         AuthenticationServer(context);
     final AuthenticationBloc _authenticationBloc =
-        AuthenticationBloc(_authenticationserver);
+        AuthenticationBloc(_authenticationServer);
     return AuthenticationBlocProvider(
       authenticationBloc: _authenticationBloc,
       child: StreamBuilder(
@@ -49,12 +43,14 @@ class Depreciation extends StatelessWidget {
             );
           } else if (snapshot.hasData) {
             return DiaryBlocProvider(
-              diaryBloc: DiaryBloc(DbDiaryService(), _authenticationserver),
+              diaryBloc: DiaryBloc(DbDiaryService(), _authenticationServer,
+                  DbFirestoreService()),
               uid: snapshot.data!,
               child: DepreciationPage(
                 idAsset: idAsset,
                 flag: flag,
-                maPB: maPB ?? "",
+                idDepartment: idDepartment ?? "",
+                newIdAsset: newIdAsset,
               ),
             );
           } else {
@@ -73,9 +69,14 @@ class Depreciation extends StatelessWidget {
 class DepreciationPage extends StatefulWidget {
   final String idAsset;
   final int flag;
-  final String maPB;
+  final String idDepartment;
+  final String? newIdAsset;
   const DepreciationPage(
-      {Key? key, required this.idAsset, required this.flag, required this.maPB})
+      {Key? key,
+      required this.idAsset,
+      required this.flag,
+      this.newIdAsset,
+      required this.idDepartment})
       : super(key: key);
 
   @override
@@ -90,13 +91,31 @@ class _DepreciationPageState extends State<DepreciationPage> {
   String name = '';
   List<DiaryModel> list = [];
   DiaryModel diaryModel = new DiaryModel();
+  AssetsModel assetsModel = new AssetsModel();
+  String buttonText = "";
 
-  double khauHao = 0;
-  double luyKe = 0;
-  double conLai = 0;
-  int _nguyenGia = 0;
-  int _tgsd = 0;
-  int soThang = 0;
+  double depreciationDouble = 0;
+  double accumulatedDouble = 0;
+  double residualDouble = 0;
+  int originalPrice = 0;
+  int usedTime = 0;
+  int numberMonths = 0;
+
+  @override
+  void initState() {
+    switch (widget.flag) {
+      case 1:
+        buttonText = AssetString.BUTTON_TEXT_LIQUIDATION;
+        break;
+      case 2:
+        buttonText = AssetString.BUTTON_TEXT_UPDATE_ASSET;
+        break;
+      case 3:
+        buttonText = AssetString.BUTTON_TEXT_CONTINUE;
+        break;
+    }
+    super.initState();
+  }
 
   @override
   void didChangeDependencies() {
@@ -108,35 +127,38 @@ class _DepreciationPageState extends State<DepreciationPage> {
         ? displayName.substring(21, displayName.length)
         : displayName;
     diaryBloc?.idAssetEditChanged.add(widget.idAsset);
-    //DiaryBloc.maPbEditChanged.add(maPb);
   }
 
-  void _addorEdit({
+  void _addOrEdit({
     required bool add,
     required DiaryModel diaryModel,
-    required double luyke,
-    required int soThang,
+    required int numberMonths,
     required bool flag,
-    required String maPB,
+    required String idDepartment,
   }) {
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (BuildContext context) => DiaryEditBlocProvider(
-                diaryEditBloc: DiaryEditBloc(DbDiaryService(), add, diaryModel),
-                uid: '',
-                child: NangCapPage(
-                  luyke: luyKe,
-                  soThang: soThang,
+                diaryEditBloc: DiaryEditBloc(
+                    dbDiaryApi: DbDiaryService(),
+                    dbApi: DbFirestoreService(),
+                    add: add,
+                    selectDiaryModel: diaryModel),
+                child: UpdateValueAssetPage(
+                  accumulatedDouble: accumulatedDouble,
+                  numberMonths: numberMonths,
                   flag: flag,
-                  maPB: maPB,
+                  idDepartment: idDepartment,
+                  originalPrice: diaryModel.originalPrice ?? "",
+                  usedTime: diaryModel.usedTime ?? "",
                 ),
               ),
           fullscreenDialog: true),
     );
   }
 
-  void _addorEditThanhLy({required bool add, required ThanhLy thanhLy}) {
+  void _addOrEditThanhLy({required bool add, required ThanhLy thanhLy}) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -149,234 +171,258 @@ class _DepreciationPageState extends State<DepreciationPage> {
     );
   }
 
+  createPDF() async {
+    if (assetsModel.nameAsset != null &&
+        assetsModel.nameAsset?.isNotEmpty == true) {
+      final pdfFile = await PdfThongTinKHApi.generate(
+          assetsModel,
+          list,
+          depreciationDouble.toInt().toVND(),
+          accumulatedDouble.toInt().toVND(),
+          residualDouble.toInt().toVND(),
+          email,
+          name);
+
+      PdfApi.openFile(pdfFile, context);
+    }
+  }
+
+  onHandle() {
+    if (widget.flag == 1) {
+      _addOrEditThanhLy(
+          add: true,
+          thanhLy: ThanhLy(
+              documentID: diaryModel.qrCode,
+              Ten_ts: diaryModel.nameAsset,
+              Ma_pb: diaryModel.idDepartment,
+              Don_vi_TL: '',
+              Nguyen_gia_TL: residualDouble.toInt().toVND(),
+              Ngay_TL: ''));
+    } else if (widget.flag == 2) {
+      _addOrEdit(
+          add: true,
+          diaryModel: diaryModel,
+          numberMonths: numberMonths,
+          flag: true,
+          idDepartment: widget.idDepartment);
+    } else if (widget.flag == 3) {
+      var addDiaryModel = diaryModel;
+      addDiaryModel.idAsset = widget.newIdAsset;
+      _addOrEdit(
+          add: true,
+          diaryModel: addDiaryModel,
+          numberMonths: numberMonths,
+          flag: false,
+          idDepartment: widget.idDepartment);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Khấu Hao Tài Sản"),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                final AssetsModel assets = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => XacNhanThongTin(
-                      ma: diaryModel.qrCode ?? "",
+    return Background(
+      child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          resizeToAvoidBottomInset: true,
+          appBar: AppBarCustom(
+            title: AssetString.DEPRECIATION_ASSETS,
+            actions: [
+              IconButton(
+                  onPressed: createPDF,
+                  icon: Icon(
+                    Icons.print,
+                    color: AppColors.white,
+                  )),
+              IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(
+                    Icons.close,
+                    color: AppColors.mainSub,
+                  )),
+              Container(
+                width: 15.0,
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Padding(
+                      padding: GlobalStyles.paddingPageLeftRight_15,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          StreamBuilder(
+                              stream: diaryBloc?.listDiaryModel,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (snapshot.hasData) {
+                                  return _buildListViewSeparated(
+                                      snapshot.data?.data);
+                                } else {
+                                  return Center(
+                                    child: Container(
+                                      child: Text('Thêm Tài Sản.'),
+                                    ),
+                                  );
+                                }
+                              }),
+                          StreamBuilder(
+                              stream: diaryBloc?.assets,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  assetsModel = snapshot.data!;
+                                  return SizedBox();
+                                }
+                                return SizedBox();
+                              }),
+                        ],
+                      ),
                     ),
                   ),
                 );
-                if (assets != null) {
-                  final pdfFile = await PdfThongTinKHApi.generate(
-                      assets,
-                      list,
-                      khauHao.toInt().toVND(),
-                      luyKe.toInt().toVND(),
-                      conLai.toInt().toVND(),
-                      email,
-                      name);
-                  PdfApi.openFile(pdfFile);
-                }
               },
-              icon: Icon(
-                Icons.print,
-                color: Colors.green,
-              )),
-          Container(
-            width: 15.0,
+            ),
           ),
-        ],
-      ),
-      body: StreamBuilder(
-          stream: diaryBloc?.listDiaryModel,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasData) {
-              return _buildListViewSeparated(snapshot);
-            } else {
-              return Center(
-                child: Container(
-                  child: Text('Thêm Tài Sản.'),
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                ButtonCustom(
+                  textHint: buttonText,
+                  onFunction: () => onHandle(),
+                  labelColor: AppColors.white,
+                  backgroundColor: AppColors.main,
+                  padding: GlobalStyles.paddingPageLeftRightHV_36_12,
+                  fontSize: 20,
                 ),
-              );
-            }
-          }),
+              ],
+            ),
+          )),
     );
   }
 
-  Widget _buildListViewSeparated(AsyncSnapshot snapshot) {
-    list = snapshot.data;
-    int length = list.length;
-    diaryModel = list[length - 1];
-    int index = 0;
-    DateTime now = DateTime.now();
-    DateTime start = DateTime.parse(list[0].starDate!);
-    DateTime end;
-
-    if (length == 1) {
-      soThang = month(start, now);
-      khauHao = double.parse(_getOnlyNumbers(diaryModel.depreciation ?? ""));
-      luyKe = khauHao * soThang;
-      conLai =
-          double.parse(_getOnlyNumbers(diaryModel.originalPrice ?? "")) - luyKe;
-    } else if (length > 1) {
-      start = DateTime.parse(list[0].starDate ?? "");
-      end = DateTime.parse(list[length - 1].dateUpdate ?? "");
-      for (index = 0; index < length; index++) {
-        if (index == 0) {
-          luyKe +=
-              double.parse(_getOnlyNumbers(list[index].depreciation ?? "")) *
-                  month(DateTime.parse(list[index].starDate ?? ""),
-                      DateTime.parse(list[index + 1].dateUpdate ?? ""));
-        } else if (index > 0 && index != length - 1) {
-          luyKe +=
-              double.parse(_getOnlyNumbers(list[index].depreciation ?? "")) *
-                  month(DateTime.parse(list[index].dateUpdate ?? ""),
-                      DateTime.parse(list[index + 1].dateUpdate ?? ""));
-        } else if (index > 0 && index == length - 1) {
-          luyKe +=
-              double.parse(_getOnlyNumbers(list[index].depreciation ?? "")) *
-                  month(DateTime.parse(list[index].dateUpdate ?? ""), now);
-        }
+  Widget _buildListViewSeparated(data) {
+    list = data;
+    if (list.isNotEmpty) {
+      int length = list.length;
+      if (length > 1) {
+        diaryModel = list[length - 1];
+      } else if (length > 0 && length < 2) {
+        diaryModel = list.first;
       }
-      _nguyenGia =
-          int.parse(_getOnlyNumbers(list[length - 1].originalPrice ?? ""));
-      _tgsd = int.parse(list[length - 1].usedTime ?? "") - month(now, start);
-      soThang = month(now, start);
-      khauHao =
-          double.parse(_getOnlyNumbers(list[length - 1].depreciation ?? ""));
-      conLai = _nguyenGia - luyKe;
-    }
+      int index = 0;
+      DateTime now = DateTime.now();
+      DateTime start = DateTime.parse(list[0].starDate!);
 
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Text(
-                "Phần Thông Tin Tài Sản",
-                style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-            _padding("Tên Tài Sản", diaryModel.nameAsset ?? ""),
-            _padding("Nguyên Giá", diaryModel.originalPrice ?? ""),
-            _padding("Thời Gian Sử Dụng(Tháng)", diaryModel.usedTime ?? ""),
-            _padding(
-                "Ngày Bắt Đầu",
-                DateFormat('dd/MM/yyyy')
-                    .format(DateTime.parse(diaryModel.starDate ?? ""))),
-            _padding(
-                "Ngày Kết Thúc",
-                DateFormat('dd/MM/yyyy')
-                    .format(DateTime.parse(diaryModel.endDate ?? ""))),
-            Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Text("Phần Thông Tin Khấu hao",
+      if (length == 1) {
+        numberMonths = month(start, now);
+        depreciationDouble =
+            double.parse(Alert.getOnlyNumbers(diaryModel.depreciation ?? ""));
+        accumulatedDouble = depreciationDouble * numberMonths;
+        residualDouble =
+            double.parse(Alert.getOnlyNumbers(diaryModel.originalPrice ?? "")) -
+                accumulatedDouble;
+      } else if (length > 1) {
+        start = DateTime.parse(list[0].starDate ?? "");
+        for (index = 0; index < length; index++) {
+          double _depreciation = double.parse(
+              Alert.getOnlyNumbers(list[index].depreciation ?? ""));
+          if (index == 0) {
+            accumulatedDouble += _depreciation *
+                month(DateTime.parse(list[index].starDate ?? ""),
+                    DateTime.parse(list[index + 1].dateUpdate ?? ""));
+          } else if (index > 0 && index != length - 1) {
+            accumulatedDouble += _depreciation *
+                month(DateTime.parse(list[index].dateUpdate ?? ""),
+                    DateTime.parse(list[index + 1].dateUpdate ?? ""));
+          } else if (index > 0 && index == length - 1) {
+            accumulatedDouble += _depreciation *
+                month(DateTime.parse(list[index].dateUpdate ?? ""), now);
+          }
+        }
+        originalPrice = int.parse(
+            Alert.getOnlyNumbers(list[length - 1].originalPrice ?? ""));
+        usedTime =
+            int.parse(list[length - 1].usedTime ?? "") - month(now, start);
+        numberMonths = month(now, start);
+        depreciationDouble = double.parse(
+            Alert.getOnlyNumbers(list[length - 1].depreciation ?? ""));
+        residualDouble = originalPrice - accumulatedDouble;
+      }
+
+      return Padding(
+        padding: EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  AssetString.INFO_ASSET_PART,
                   style: TextStyle(
-                      color: Colors.green,
+                      color: AppColors.main,
                       fontSize: 20,
-                      fontWeight: FontWeight.bold)),
-            ),
-            _padding("Mức Khấu Hao Hàng Tháng", khauHao.toInt().toVND()),
-            _padding("Khấu Hao Lũy Kế", luyKe.toInt().toVND()),
-            _padding("Giá Trị Còn Lại", conLai.toInt().toVND()),
-            SizedBox(
-              height: 10.0,
-            ),
-            widget.flag == 1
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextButton(
-                        child: Text(
-                          'Xác Nhận Thanh Lý',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        onPressed: () {
-                          _addorEditThanhLy(
-                              add: true,
-                              thanhLy: ThanhLy(
-                                  documentID: diaryModel.qrCode,
-                                  Ten_ts: diaryModel.nameAsset,
-                                  Ma_pb: diaryModel.idDepartment,
-                                  Don_vi_TL: '',
-                                  Nguyen_gia_TL: conLai.toInt().toVND(),
-                                  Ngay_TL: ''));
-                        },
-                      ),
-                    ],
-                  )
-                : Container(),
-            widget.flag == 2
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextButton(
-                        child: Text(
-                          'Nâng Cấp Tài Sản',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        onPressed: () {
-                          _addorEdit(
-                              add: true,
-                              diaryModel: diaryModel,
-                              luyke: luyKe,
-                              soThang: soThang,
-                              flag: true,
-                              maPB: maPb);
-                        },
-                      ),
-                    ],
-                  )
-                : Container(),
-            widget.flag == 3
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextButton(
-                        child: Text(
-                          'Tiếp tục',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        onPressed: () {
-                          _addorEdit(
-                              add: true,
-                              diaryModel: diaryModel,
-                              luyke: luyKe,
-                              soThang: soThang,
-                              flag: false,
-                              maPB: widget.maPB);
-                        },
-                      ),
-                    ],
-                  )
-                : Container(),
-          ],
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              _titleDetailLeftRight(
+                  AssetString.INFO_NAME_ASSETS, diaryModel.nameAsset),
+              _titleDetailLeftRight(
+                  AssetString.INFO_ORIGINAL_PRICE, diaryModel.originalPrice),
+              _titleDetailLeftRight(
+                  AssetString.INFO_USER_TIME, diaryModel.usedTime),
+              _titleDetailLeftRight(
+                  AssetString.INFO_START_DATE,
+                  diaryModel.starDate != null &&
+                          diaryModel.starDate?.isNotEmpty == true
+                      ? DateFormat("dd/ MM/ yyyy")
+                          .format(DateTime.parse(diaryModel.starDate!))
+                          .toString()
+                      : ""),
+              _titleDetailLeftRight(
+                  AssetString.INFO_END_DATE,
+                  diaryModel.endDate != null &&
+                          diaryModel.endDate?.isNotEmpty == true
+                      ? DateFormat("dd/ MM/ yyyy")
+                          .format(DateTime.parse(diaryModel.endDate!))
+                          .toString()
+                      : ""),
+              Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text(AssetString.INFO_DEPRECIATION_PART,
+                    style: TextStyle(
+                        color: AppColors.main,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
+              ),
+              _titleDetailLeftRight(AssetString.INFO_DEPRECIATION_MOUNT,
+                  depreciationDouble.toInt().toVND()),
+              _titleDetailLeftRight(AssetString.INFO_ACCUMULATED_DEPRECIATION,
+                  depreciationDouble.toInt().toVND()),
+              _titleDetailLeftRight(AssetString.INFO_RESIDUAL_VALUE,
+                  residualDouble.toInt().toVND()),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  String _getOnlyNumbers(String text) {
-    String cleanedText = text;
-
-    var onlyNumbersRegex = new RegExp(r'[^\d]');
-
-    cleanedText = cleanedText.replaceAll(onlyNumbersRegex, '');
-
-    return cleanedText;
+      );
+    }
+    return SizedBox();
   }
 
   int month(DateTime start, DateTime now) {
@@ -387,19 +433,18 @@ class _DepreciationPageState extends State<DepreciationPage> {
     return sum;
   }
 
-  Widget _padding(String name, String value) {
+  Widget _titleDetailLeftRight(_title, _value) {
+    final TextEditingController controller = new TextEditingController();
+    controller.value = controller.value.copyWith(text: _value);
     return Padding(
-        padding: EdgeInsets.all(5.0),
-        child: TextFormField(
-          initialValue: value,
+        padding: GlobalStyles.paddingPageTopBottom,
+        child: CustomTextFromField(
+          inputType: TextInputType.text,
+          inputAction: TextInputAction.done,
+          controller: controller,
+          labelText: _title,
+          prefixIcon: Icons.assignment_outlined,
           readOnly: true,
-          decoration: InputDecoration(
-              labelText: name,
-              prefixIcon: Icon(Icons.assignment_outlined),
-              labelStyle: TextStyle(color: Colors.blueAccent, fontSize: 15),
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green, width: 1),
-                  borderRadius: BorderRadius.all(Radius.circular(10)))),
         ));
   }
 }

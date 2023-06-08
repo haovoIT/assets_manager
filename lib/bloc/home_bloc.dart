@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/models/base_response.dart';
 import 'package:assets_manager/services/db_asset_api.dart';
 import 'package:assets_manager/services/db_authentic_api.dart';
 import 'package:assets_manager/services/db_history_asset_api.dart';
@@ -35,25 +36,25 @@ class HomeBloc {
   Sink<String> get tinhtrangEditChanged => _tinhtrangController.sink;
   Stream<String> get tinhtrangEdit => _tinhtrangController.stream;
 
-  final StreamController<List<AssetsModel>> _assetsController =
-      StreamController<List<AssetsModel>>.broadcast();
-  Sink<List<AssetsModel>> get _addListAssets => _assetsController.sink;
-  Stream<List<AssetsModel>> get listAssets => _assetsController.stream;
+  final StreamController<BaseResponse> _assetsController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get _addListAssets => _assetsController.sink;
+  Stream<BaseResponse> get listAssets => _assetsController.stream;
 
-  final StreamController<List<AssetsModel>> _assetIDController =
-      StreamController<List<AssetsModel>>.broadcast();
-  Sink<List<AssetsModel>> get _addListIDAssets => _assetIDController.sink;
-  Stream<List<AssetsModel>> get listIDAssets => _assetIDController.stream;
+  final StreamController<BaseResponse> _assetIDController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get _addListIDAssets => _assetIDController.sink;
+  Stream<BaseResponse> get listIDAssets => _assetIDController.stream;
 
-  final StreamController<List<AssetsModel>> _assetTTController =
-      StreamController<List<AssetsModel>>.broadcast();
-  Sink<List<AssetsModel>> get _addListTTAssets => _assetTTController.sink;
-  Stream<List<AssetsModel>> get listTTAssets => _assetTTController.stream;
+  final StreamController<BaseResponse> _assetTTController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get _addListTTAssets => _assetTTController.sink;
+  Stream<BaseResponse> get listTTAssets => _assetTTController.stream;
 
-  final StreamController<List<AssetsModel>> _assetsPBController =
-      StreamController<List<AssetsModel>>.broadcast();
-  Sink<List<AssetsModel>> get _addListAssetsPB => _assetsPBController.sink;
-  Stream<List<AssetsModel>> get listAssetsPB => _assetsPBController.stream;
+  final StreamController<BaseResponse> _assetsPBController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get _addListAssetsPB => _assetsPBController.sink;
+  Stream<BaseResponse> get listAssetsPB => _assetsPBController.stream;
 
   //final StreamController<Assets> _assetController = StreamController<Assets>.broadcast();
   //Sink<Assets> get _addAssets => _assetController.sink;
@@ -66,7 +67,7 @@ class HomeBloc {
   void _startListeners() {
     _maPBController.stream.listen((idDepartment) {
       dbApi.getAssetsList(idDepartment: idDepartment).listen((assetsDocs) {
-        _addListAssets.add(assetsDocs);
+        _addListAssets.add(assetsDocs!);
       });
     });
 
@@ -85,11 +86,11 @@ class HomeBloc {
 
     _maController.stream.listen((maTs) {
       dbApi
-          .getAssetsID(
+          .getListAssetsID(
               idDepartment: maTs.substring(27, maTs.length),
               id: maTs.substring(0, 26))
           .listen((assets) {
-        _addListIDAssets.add(assets);
+        _addListIDAssets.add(assets!);
       });
     });
 
@@ -98,7 +99,7 @@ class HomeBloc {
         dbApi
             .getAssetsStatus(idDepartment: idDepartment, status: status)
             .listen((listAssetTT) {
-          _addListTTAssets.add(listAssetTT);
+          _addListTTAssets.add(listAssetTT!);
         });
       });
     });
@@ -107,7 +108,7 @@ class HomeBloc {
       dbApi
           .getAssetsOfDepartment(idDepartment: idDepartment)
           .listen((listAssetsPB) {
-        _addListAssetsPB.add(listAssetsPB);
+        _addListAssetsPB.add(listAssetsPB!);
       });
     });
   }

@@ -293,7 +293,7 @@ class _QuetQRsState extends State<QuetQRs> {
                                   userId: snapshot.data[index].userId);
                               final pdfFile = await PdfThongTinTSApi.generate(
                                   assets, email, name);
-                              PdfApi.openFile(pdfFile);
+                              PdfApi.openFile(pdfFile, context);
                             },
                             child: Text(
                               'IN PDF',

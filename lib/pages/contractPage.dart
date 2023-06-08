@@ -135,7 +135,7 @@ class _ContractPagesState extends State<ContractPages> {
               onPressed: () async {
                 final pdfFile =
                     await PdfDSHopDongApi.generate(listContract, email, name);
-                PdfApi.openFile(pdfFile);
+                PdfApi.openFile(pdfFile, context);
               },
               icon: Icon(
                 Icons.print,

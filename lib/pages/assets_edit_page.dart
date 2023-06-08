@@ -1,14 +1,12 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
-import 'package:assets_manager/bloc/assets_edit_bloc_provider.dart';
+import 'package:assets_manager/bloc/bloc_index.dart';
 import 'package:assets_manager/classes/format_money.dart';
 import 'package:assets_manager/classes/money_format.dart';
 import 'package:assets_manager/classes/validators.dart';
 import 'package:assets_manager/component/index.dart';
-import 'package:assets_manager/global_widget/appbar_custom.dart';
-import 'package:assets_manager/global_widget/asset_widget/index.dart';
-import 'package:assets_manager/global_widget/button_custom.dart';
+import 'package:assets_manager/global_widget/global_widget_index.dart';
 import 'package:assets_manager/pages/departmentList.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 
 class AssetEditPage extends StatefulWidget {
   final bool flag;
@@ -21,6 +19,7 @@ class AssetEditPage extends StatefulWidget {
 class _AssetEditPageState extends State<AssetEditPage> {
   AssetsEditBloc? _assetsEditBloc;
   TextEditingController _nameAssetController = new TextEditingController();
+  TextEditingController _codeController = new TextEditingController();
   TextEditingController _departmentNameController = new TextEditingController();
   TextEditingController _producingCountryController =
       new TextEditingController();
@@ -44,17 +43,6 @@ class _AssetEditPageState extends State<AssetEditPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _nameAssetController = TextEditingController();
-    _departmentNameController = TextEditingController();
-    _producingCountryController = TextEditingController();
-    _assetGroupNameController = TextEditingController();
-    _statusController = TextEditingController();
-    _usedTimeController = TextEditingController();
-    _amountController = TextEditingController();
-    _contractNameController = TextEditingController();
-    _purposeOfUsingController = TextEditingController();
-    _starDateController = TextEditingController();
-    _endDateController = TextEditingController();
     _originalPriceController = MoneyMaskedTextControllers(
       thousandSeparator: '.',
       initialValue: 0,
@@ -66,7 +54,7 @@ class _AssetEditPageState extends State<AssetEditPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _assetsEditBloc = AssetsEditBlocProvider.of(context)!.assetsEditBloc;
-    if (!widget.flag) {
+    if (widget.flag) {
       flagStartDate = true;
     }
   }
@@ -138,10 +126,10 @@ class _AssetEditPageState extends State<AssetEditPage> {
                   ? AssetString.ERROR_MASSAGE
                   : AssetString.UPDATE_ERROR_MASSAGE,
               context: context,
-              streamBuilder: _assetsEditBloc?.responseEdit,
-              sink: _assetsEditBloc?.responseEditChanged)
+              streamBuilder: _assetsEditBloc?.responseSaveEdit,
+              sink: _assetsEditBloc?.responseSaveEditChanged)
           .then((value) {
-        if (value == DomainProvider.SUCCESS) {
+        if (value != null && value.status == 0) {
           Navigator.pop(context);
         }
       });
@@ -176,8 +164,14 @@ class _AssetEditPageState extends State<AssetEditPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
+                      CodeWidget(
+                          stream: _assetsEditBloc?.codeEdit,
+                          sink: _assetsEditBloc?.codeEditChanged,
+                          codeController: _codeController),
+                      GlobalStyles.sizedBoxHeight,
                       NameAssets(
-                          assetsEditBloc: _assetsEditBloc,
+                          stream: _assetsEditBloc?.nameAssetEdit,
+                          sink: _assetsEditBloc?.nameAssetEditChanged,
                           nameAssetController: _nameAssetController),
                       GlobalStyles.sizedBoxHeight, //Tên TS
                       ChooseDepartmentName(
@@ -205,28 +199,32 @@ class _AssetEditPageState extends State<AssetEditPage> {
                       ),
                       GlobalStyles.sizedBoxHeight, //NhomTs
                       OriginalPrice(
-                        assetsEditBloc: _assetsEditBloc,
+                        stream: _assetsEditBloc?.originalPriceEdit,
                         originalPriceController: _originalPriceController,
-                        flag: widget.flag,
+                        readOnly: widget.flag == true ? false : true,
+                        onChangeFunction: (originalPrice) => _assetsEditBloc
+                            ?.originalPriceEditChanged
+                            .add(Alert.getOnlyNumbers(originalPrice).toVND()),
                       ), //Nguyên Giá
                       GlobalStyles.sizedBoxHeight,
                       UsedTime(
                         usedTimeController: _usedTimeController,
-                        assetsEditBloc: _assetsEditBloc,
+                        stream: _assetsEditBloc?.usedTimeEdit,
                         userTimes: userTimeInt,
-                        flag: widget.flag,
                         onChangedFunction: onChangedFunctionUsedTime,
                       ),
                       GlobalStyles.sizedBoxHeight, //TGSD
                       StartDate(
-                        assetsEditBloc: _assetsEditBloc,
+                        stream: _assetsEditBloc?.starDateEdit,
+                        sinkEndDate: _assetsEditBloc?.endDateEditChanged,
+                        sinkStartDate: _assetsEditBloc?.starDateEditChanged,
                         flagStartDate: flagStartDate,
                         userTime: userTimeInt,
-                        starDateController: _starDateController,
+                        startDateController: _starDateController,
                       ),
                       GlobalStyles.sizedBoxHeight, //NgayBD
                       EndDate(
-                        assetsEditBloc: _assetsEditBloc,
+                        stream: _assetsEditBloc?.endDateEdit,
                       ), //NgayKT
                       GlobalStyles.sizedBoxHeight,
                       Amount(

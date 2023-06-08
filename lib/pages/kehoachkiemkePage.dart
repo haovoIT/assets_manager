@@ -15,7 +15,6 @@ import 'package:assets_manager/services/db_authentic.dart';
 import 'package:assets_manager/services/db_kehoachkiemke.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:intl/intl.dart';
@@ -113,7 +112,7 @@ class _KeHoachKiemKesState extends State<KeHoachKiemKes> {
               onPressed: () async {
                 final pdfFile = await PdfDanhSachKHKKApi.generate(
                     listKHKK ?? [], email, name);
-                PdfApi.openFile(pdfFile);
+                PdfApi.openFile(pdfFile, context);
               },
               icon: Icon(
                 Icons.print,

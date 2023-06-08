@@ -1,21 +1,8 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
-import 'package:assets_manager/bloc/assets_edit_bloc_provider.dart';
-import 'package:assets_manager/bloc/authentication_bloc.dart';
-import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
-import 'package:assets_manager/bloc/home_bloc.dart';
-import 'package:assets_manager/bloc/home_bloc_provider.dart';
+import 'package:assets_manager/bloc/bloc_index.dart';
 import 'package:assets_manager/component/index.dart';
 import 'package:assets_manager/models/asset_model.dart';
-import 'package:assets_manager/pages/assets_convert_page.dart';
-import 'package:assets_manager/pages/assets_edit_page.dart';
-import 'package:assets_manager/pages/depreciation_page.dart';
-import 'package:assets_manager/pages/history_asset_page.dart';
-import 'package:assets_manager/pages/liquidation_confirmation_asset_page.dart';
-import 'package:assets_manager/pages/sotheodoiPage.dart';
-import 'package:assets_manager/services/db_asset.dart';
-import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_diary.dart';
-import 'package:assets_manager/services/db_history_asset.dart';
+import 'package:assets_manager/pages/page_index.dart';
+import 'package:assets_manager/services/service_index.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -138,8 +125,8 @@ class _AssetsPageState extends State<AssetsPage> {
               );
             } else if (snapshot.hasData) {
               return widget.flag
-                  ? _buildListViewAsset(snapshot)
-                  : _buildListViewDepreciation(snapshot);
+                  ? _buildListViewAsset(snapshot.data?.data)
+                  : _buildListViewDepreciation(snapshot.data?.data);
             } else {
               return Center(
                 child: Container(
@@ -169,14 +156,14 @@ class _AssetsPageState extends State<AssetsPage> {
     );
   }
 
-  Widget _buildListViewAsset(AsyncSnapshot snapshot) {
+  Widget _buildListViewAsset(data) {
     return ListView.separated(
-        itemCount: snapshot.data.length,
+        itemCount: data.length,
         itemBuilder: (BuildContext context, int index) {
-          final AssetsModel itemAssets = snapshot.data[index];
-          String? _title = itemAssets.nameAsset;
+          final AssetsModel itemAssets = data[index];
+          String? _title = itemAssets.code;
           return Dismissible(
-            key: Key(snapshot.data[index].documentID),
+            key: Key(data[index].documentID),
             background: Container(
               color: Colors.red,
               alignment: Alignment.centerLeft,
@@ -231,12 +218,12 @@ class _AssetsPageState extends State<AssetsPage> {
             ),
             confirmDismiss: (direction) async {
               if (direction.toString() == "DismissDirection.endToStart") {
-                bool confirmLSSD = await Alert.showConfirm(context,
+                bool confirmHistory = await Alert.showConfirm(context,
                     title: AssetString.TITLE_HISTORY,
                     detail: AssetString.CONTENT_CONFIRM_TITLE_HISTORY,
                     btTextTrue: CommonString.CONTINUE,
                     btTextFalse: CommonString.CANCEL);
-                if (confirmLSSD) {
+                if (confirmHistory) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -252,7 +239,7 @@ class _AssetsPageState extends State<AssetsPage> {
                     btTextTrue: CommonString.CONTINUE,
                     btTextFalse: CommonString.CANCEL);
                 if (confirmDelete) {
-                  _homeBloc.deleteAssets.add(snapshot.data[index]);
+                  _homeBloc.deleteAssets.add(data[index]);
                 }
               }
               return null;
@@ -272,6 +259,8 @@ class _AssetsPageState extends State<AssetsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _textSubTitle(AssetString.INFO_NAME_ASSETS, item.nameAsset),
+        GlobalStyles.divider,
         _textSubTitle(AssetString.DEPARTMENTS, item.departmentName),
         GlobalStyles.divider,
         _textSubTitle(AssetString.STATUS, item.status ?? ""),
@@ -328,20 +317,27 @@ class _AssetsPageState extends State<AssetsPage> {
     );
   }
 
-  Widget _buildListViewDepreciation(AsyncSnapshot snapshot) {
+  Widget _buildListViewDepreciation(data) {
     return ListView.separated(
-        itemCount: snapshot.data.length,
+        itemCount: data.length,
         itemBuilder: (BuildContext context, int index) {
-          final AssetsModel item = snapshot.data[index];
-          String? _title = item.nameAsset;
+          final AssetsModel item = data[index];
+          String? _title = item.code;
           return Dismissible(
-            key: Key(snapshot.data[index].documentID),
+            key: Key(data[index].documentID),
             background: Container(
-              color: Colors.red,
+              color: AppColors.greenLight,
               alignment: Alignment.centerLeft,
-              child: Icon(
-                Icons.delete,
-                color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.track_changes_outlined,
+                    color: Colors.white,
+                  ),
+                  Text(AssetString.DEPRECIATION_TRACKING_TITLE),
+                ],
               ),
             ),
             secondaryBackground: Container(
@@ -351,7 +347,7 @@ class _AssetsPageState extends State<AssetsPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text("Xác Nhận Thanh Lý  "),
+                    Text(AssetString.LIQUIDATION_TITLE),
                     Icon(
                       Icons.outbond_rounded,
                       color: Colors.white,
@@ -380,14 +376,6 @@ class _AssetsPageState extends State<AssetsPage> {
                                 flag: 2,
                               )));
                 },
-                onLongPress: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SoTheoDoiPage(
-                                ma: snapshot.data[index].qrCode,
-                              )));
-                },
               ),
             ),
             confirmDismiss: (direction) async {
@@ -398,15 +386,12 @@ class _AssetsPageState extends State<AssetsPage> {
                 );
               } else if (direction.toString() ==
                   "DismissDirection.startToEnd") {
-                bool confirmDelete = await Alert.showConfirm(context,
-                    title: AssetString.CONFIRM_TITLE_DELETE,
-                    detail: AssetString.CONTENT_CONFIRM_TITLE_DELETE,
-                    btTextTrue: CommonString.CONTINUE,
-                    btTextFalse: CommonString.CANCEL);
-                ;
-                if (confirmDelete) {
-                  _homeBloc.deleteAssets.add(snapshot.data[index]);
-                }
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DepreciationTracking(
+                              idAsset: item.documentID ?? "",
+                            )));
               }
 
               return null;
@@ -447,6 +432,8 @@ class _AssetsPageState extends State<AssetsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _textSubTitle(AssetString.INFO_NAME_ASSETS, item.nameAsset),
+        GlobalStyles.divider,
         _textSubTitle(AssetString.ORIGINAL_PRICES, item.originalPrice),
         GlobalStyles.divider,
         _textSubTitle(AssetString.USER_TIME, item.usedTime ?? "" + "Tháng"),

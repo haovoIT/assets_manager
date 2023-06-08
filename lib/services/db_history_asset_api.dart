@@ -1,6 +1,7 @@
+import 'package:assets_manager/models/base_response.dart';
 import 'package:assets_manager/models/history_asset_model.dart';
 
 abstract class DbHistoryAssetApi {
-  Stream<List<HistoryAssetModel>> getHistoryAsset(String idAsset);
-  Future<String> addHistoryAsset(HistoryAssetModel historyAssetModel);
+  Stream<BaseResponse> getHistoryAsset(String idAsset);
+  Future<BaseResponse> addHistoryAsset(HistoryAssetModel historyAssetModel);
 }

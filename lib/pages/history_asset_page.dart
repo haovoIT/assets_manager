@@ -98,7 +98,7 @@ class _HistoryAssetPageState extends State<HistoryAssetPage> {
                 onPressed: () async {
                   final pdfFile =
                       await PdfLSSDApi.generate(listHistoryAsset, email, name);
-                  PdfApi.openFile(pdfFile);
+                  PdfApi.openFile(pdfFile, context);
                 },
                 icon: Icon(
                   Icons.print,
