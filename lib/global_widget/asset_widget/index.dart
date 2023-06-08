@@ -1,9 +1,12 @@
 export 'amount.dart';
 export 'asset_group_name.dart';
 export 'choose_department_name.dart';
+export 'choose_detail.dart';
 export 'choose_status.dart';
 export 'choose_year_of_manufacture.dart';
+export 'code_widget.dart';
 export 'contract_name.dart';
+export 'depreciation_widget.dart';
 export 'end_date.dart';
 export 'name_assets.dart';
 export 'original_price.dart';

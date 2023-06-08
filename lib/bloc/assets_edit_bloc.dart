@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:assets_manager/component/domain_service.dart';
 import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/models/base_response.dart';
 import 'package:assets_manager/models/diary_model.dart';
 import 'package:assets_manager/models/history_asset_model.dart';
 import 'package:assets_manager/services/db_asset_api.dart';
@@ -36,6 +37,10 @@ class AssetsEditBloc {
       StreamController<String>.broadcast();
   Sink<String> get nameAssetEditChanged => _nameAssetController.sink;
   Stream<String> get nameAssetEdit => _nameAssetController.stream;
+  final StreamController<String> _codeController =
+      StreamController<String>.broadcast();
+  Sink<String> get codeEditChanged => _codeController.sink;
+  Stream<String> get codeEdit => _codeController.stream;
 
   final StreamController<String> _idDepartmentController =
       StreamController<String>.broadcast();
@@ -120,14 +125,30 @@ class AssetsEditBloc {
   Sink<String> get depreciationEditChanged => _depreciationController.sink;
   Stream<String> get depreciationEdit => _depreciationController.stream;
 
-  final StreamController<String> _responseController =
-      StreamController<String>.broadcast();
-  Sink<String> get responseEditChanged => _responseController.sink;
-  Stream<String> get responseEdit => _responseController.stream;
+  final StreamController<BaseResponse> _responseSaveController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get responseSaveEditChanged =>
+      _responseSaveController.sink;
+  Stream<BaseResponse> get responseSaveEdit => _responseSaveController.stream;
+
+  final StreamController<BaseResponse> _responseAddController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get responseAddEditChanged => _responseAddController.sink;
+  Stream<BaseResponse> get responseAddEdit => _responseAddController.stream;
+
+  final StreamController<BaseResponse> _responseConvertController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get responseConvertEditChanged =>
+      _responseConvertController.sink;
+  Stream<BaseResponse> get responseConvertEdit =>
+      _responseConvertController.stream;
 
   _startEditListeners() async {
     _nameAssetController.stream.listen((nameAsset) {
       selectAsset.nameAsset = nameAsset;
+    });
+    _codeController.stream.listen((code) {
+      selectAsset.code = code;
     });
     _idDepartmentController.stream.listen((idDepartment) {
       selectAsset.idDepartment = idDepartment;
@@ -190,6 +211,7 @@ class AssetsEditBloc {
       selectAsset = AssetsModel();
       selectAsset.documentID = asset.documentID;
       selectAsset.nameAsset = asset.nameAsset;
+      selectAsset.code = asset.code;
       selectAsset.idDepartment = asset.idDepartment;
       selectAsset.departmentName = asset.departmentName;
       selectAsset.yearOfManufacture = asset.yearOfManufacture;
@@ -227,6 +249,7 @@ class AssetsEditBloc {
       // selectAsset.depreciation = '';
     } else {
       selectAsset.nameAsset = asset.nameAsset;
+      selectAsset.code = asset.code;
       selectAsset.idDepartment = asset.idDepartment;
       selectAsset.departmentName = asset.departmentName;
       selectAsset.yearOfManufacture = asset.yearOfManufacture;
@@ -247,6 +270,7 @@ class AssetsEditBloc {
     }
 
     nameAssetEditChanged.add(selectAsset.nameAsset ?? "");
+    codeEditChanged.add(selectAsset.code ?? "");
     idDepartmentEditChanged.add(selectAsset.idDepartment ?? "");
     departmentNameEditChanged.add(selectAsset.departmentName ?? "");
     yearOfManufactureEditChanged.add(selectAsset.yearOfManufacture ?? "");
@@ -270,6 +294,7 @@ class AssetsEditBloc {
     AssetsModel assets = AssetsModel(
       documentID: selectAsset.documentID,
       nameAsset: selectAsset.nameAsset,
+      code: selectAsset.code,
       idDepartment: selectAsset.idDepartment,
       departmentName: selectAsset.departmentName,
       yearOfManufacture: selectAsset.yearOfManufacture,
@@ -289,12 +314,12 @@ class AssetsEditBloc {
       depreciation: selectAsset.depreciation,
     );
     if (add) {
-      String responseAddAsset = await dbApi.addAssets(assets: assets);
-      if (responseAddAsset != "" && responseAddAsset.isNotEmpty == true) {
+      final responseAddAsset = await dbApi.addAssets(assets: assets);
+      if (responseAddAsset != null && responseAddAsset.status == 0) {
         DiaryModel diary = DiaryModel(
             documentID: selectAsset.qrCode,
             nameAsset: selectAsset.nameAsset,
-            idAsset: responseAddAsset,
+            idAsset: responseAddAsset.data,
             idDepartment: selectAsset.idDepartment,
             originalPrice: selectAsset.originalPrice,
             usedTime: selectAsset.usedTime,
@@ -307,11 +332,12 @@ class AssetsEditBloc {
             userEmail: email,
             dateUpdate: DateTime.now().toString(),
             detail: "Thêm Mới");
-        String responseAddDiary = await dbDiaryApi.addDiaryModel(diary);
+        await dbDiaryApi.addDiaryModel(diary);
         HistoryAssetModel historyAssetModel = HistoryAssetModel(
           documentID: selectAsset.qrCode,
           nameAsset: selectAsset.nameAsset,
-          idAsset: responseAddAsset,
+          code: selectAsset.code,
+          idAsset: responseAddAsset.data,
           idDepartment: selectAsset.idDepartment,
           departmentName: selectAsset.departmentName,
           yearOfManufacture: selectAsset.yearOfManufacture,
@@ -333,22 +359,20 @@ class AssetsEditBloc {
           userEmail: email,
           dateUpdate: DateTime.now().toString(),
         );
-        dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
-        if (responseAddDiary != "" && responseAddDiary.isNotEmpty == true) {
-          responseEditChanged.add(DomainProvider.SUCCESS);
-        } else {
-          responseEditChanged.add(DomainProvider.ERROR);
-        }
+        final response =
+            await dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
+        responseSaveEditChanged.add(response);
       } else {
-        responseEditChanged.add(DomainProvider.ERROR);
+        responseSaveEditChanged.add(responseAddAsset!);
       }
     } else {
       final responseAsset =
           await dbApi.updateAssetWithTransaction(assets: assets);
-      if (responseAsset == DomainProvider.SUCCESS) {
+      if (responseAsset != null && responseAsset.status == 0) {
         HistoryAssetModel historyAssetModel = HistoryAssetModel(
           nameAsset: selectAsset.nameAsset,
           idAsset: selectAsset.documentID,
+          code: selectAsset.code,
           idDepartment: selectAsset.idDepartment,
           departmentName: selectAsset.departmentName,
           yearOfManufacture: selectAsset.yearOfManufacture,
@@ -372,13 +396,9 @@ class AssetsEditBloc {
         );
         final responseHistory =
             await dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
-        if (responseHistory != "" && responseHistory.isNotEmpty == true) {
-          responseEditChanged.add(DomainProvider.SUCCESS);
-        } else {
-          responseEditChanged.add(DomainProvider.ERROR);
-        }
+        responseSaveEditChanged.add(responseHistory);
       } else {
-        responseEditChanged.add(DomainProvider.ERROR);
+        responseSaveEditChanged.add(responseAsset!);
       }
     }
   }
@@ -387,6 +407,7 @@ class AssetsEditBloc {
     AssetsModel assets = AssetsModel(
       documentID: selectAsset.documentID,
       nameAsset: selectAsset.nameAsset,
+      code: selectAsset.code,
       idDepartment: selectAsset.idDepartment,
       departmentName: selectAsset.departmentName,
       yearOfManufacture: selectAsset.yearOfManufacture,
@@ -405,12 +426,37 @@ class AssetsEditBloc {
       depreciation: selectAsset.depreciation,
       dateCreate: DateTime.now().toString(),
     );
-    String responseAddAsset = await dbApi.addAssets(assets: assets);
-
-    if (responseAddAsset != "" && responseAddAsset.isNotEmpty == true) {
-      responseEditChanged.add(DomainProvider.SUCCESS);
+    final responseAddAsset = await dbApi.addAssets(assets: assets);
+    if (responseAddAsset != null && responseAddAsset.status == 0) {
+      HistoryAssetModel historyAssetModel = HistoryAssetModel(
+        nameAsset: selectAsset.nameAsset,
+        code: selectAsset.code,
+        idAsset: selectAsset.documentID,
+        idDepartment: selectAsset.idDepartment,
+        departmentName: selectAsset.departmentName,
+        yearOfManufacture: selectAsset.yearOfManufacture,
+        producingCountry: selectAsset.producingCountry,
+        assetGroupName: selectAsset.assetGroupName,
+        status: selectAsset.status,
+        originalPrice: selectAsset.originalPrice,
+        usedTime: selectAsset.usedTime,
+        amount: selectAsset.amount,
+        contractName: selectAsset.contractName,
+        purposeOfUsing: selectAsset.purposeOfUsing,
+        qrCode: selectAsset.qrCode,
+        userId: selectAsset.userId,
+        starDate: selectAsset.starDate,
+        endDate: selectAsset.endDate,
+        depreciation: selectAsset.depreciation,
+        userName: name,
+        userEmail: email,
+        dateUpdate: DateTime.now().toString(),
+      );
+      final responseHistory =
+          await dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
+      responseAddEditChanged.add(responseHistory);
     } else {
-      responseEditChanged.add(DomainProvider.ERROR);
+      responseAddEditChanged.add(responseAddAsset!);
     }
   }
 
@@ -419,6 +465,7 @@ class AssetsEditBloc {
       final AssetsModel convertAsset = AssetsModel(
         documentID: selectAsset.documentID,
         nameAsset: selectAsset.nameAsset,
+        code: selectAsset.code,
         idDepartment: selectAsset.idDepartment,
         departmentName: selectAsset.departmentName,
         yearOfManufacture: selectAsset.yearOfManufacture,
@@ -439,9 +486,10 @@ class AssetsEditBloc {
       );
 
       final responseAsset = await dbApi.updateAsset(assets: convertAsset);
-      if (responseAsset == DomainProvider.SUCCESS) {
+      if (responseAsset != null && responseAsset.status == 0) {
         HistoryAssetModel historyAssetModel = HistoryAssetModel(
           nameAsset: selectAsset.nameAsset,
+          code: selectAsset.code,
           idAsset: selectAsset.documentID,
           idDepartment: selectAsset.idDepartment,
           departmentName: selectAsset.departmentName,
@@ -465,13 +513,9 @@ class AssetsEditBloc {
         );
         final responseHistory =
             await dbHistoryAssetApi.addHistoryAsset(historyAssetModel);
-        if (responseHistory != "" && responseHistory.isNotEmpty == true) {
-          responseEditChanged.add(DomainProvider.SUCCESS);
-        } else {
-          responseEditChanged.add(DomainProvider.ERROR);
-        }
+        responseConvertEditChanged.add(responseHistory);
       } else {
-        responseEditChanged.add(DomainProvider.ERROR);
+        responseConvertEditChanged.add(responseAsset!);
       }
     }
   }
@@ -494,6 +538,9 @@ class AssetsEditBloc {
     _saveController.close();
     _depreciationController.close();
     _departmentNameController.close();
-    _responseController.close();
+    _responseConvertController.close();
+    _responseAddController.close();
+    _responseSaveController.close();
+    _codeController.close();
   }
 }

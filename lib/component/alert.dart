@@ -5,6 +5,7 @@ import 'package:assets_manager/component/app_string.dart';
 import 'package:assets_manager/component/domain_service.dart';
 import 'package:assets_manager/component/global_styles.dart';
 import 'package:assets_manager/global_widget/text_field_login.dart';
+import 'package:assets_manager/models/base_response.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -302,6 +303,22 @@ class Alert {
     return selectedDate;
   }
 
+  static double onChangeDepreciation({
+    required userTimeInt,
+    required numberMonths,
+    required originalPrice,
+    required accumulatedDouble,
+  }) {
+    double depreciationDouble = 0.0;
+    double residualDouble = 0.0;
+    int residualMonthInt = 0;
+    residualDouble =
+        double.parse(Alert.getOnlyNumbers(originalPrice)) - accumulatedDouble;
+    residualMonthInt = userTimeInt - numberMonths;
+    depreciationDouble = residualDouble / residualMonthInt;
+    return depreciationDouble;
+  }
+
   static Future<String?> selectStatus(context) async {
     String? results;
     await Picker(
@@ -332,12 +349,42 @@ class Alert {
     return results;
   }
 
+  static Future<String?> selectDetail(context) async {
+    String? results;
+    await Picker(
+        height: 220,
+        itemExtent: 50,
+        textStyle: GlobalStyles.textStyleTextFormField,
+        adapter: PickerDataAdapter<String>(pickerData: AssetString.LIST_DETAIL),
+        changeToFirst: true,
+        hideHeader: false,
+        cancelText: CommonString.CANCEL,
+        confirmText: CommonString.CONTINUE,
+        cancelTextStyle: TextStyle(color: Colors.white, fontSize: 20.0),
+        confirmTextStyle: TextStyle(color: Colors.white, fontSize: 20.0),
+        title: Text(
+          AssetString.CHOOSE_DETAIL,
+          style: TextStyle(
+            fontSize: 22.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        headerColor: AppColors.accentBlue,
+        selectedTextStyle:
+            TextStyle(color: AppColors.greenLight, fontWeight: FontWeight.bold),
+        onConfirm: (picker, value) {
+          results = picker.adapter.text;
+        }).showModal(context);
+    return results;
+  }
+
   static Future<dynamic> showResponse({
     required String successMessage,
     required String errorMessage,
     required BuildContext context,
-    required Stream<String>? streamBuilder,
-    required Sink<String>? sink,
+    required Stream<BaseResponse>? streamBuilder,
+    required Sink<BaseResponse>? sink,
   }) {
     return showDialog(
       context: context,
@@ -347,38 +394,33 @@ class Alert {
           final data = snapshot.data;
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
-          } else if (data != "" && data.isNotEmpty == true) {
-            if (data == DomainProvider.SUCCESS) {
-              return CupertinoAlertDialog(
-                title: Text(CommonString.SUCCESS),
-                content: Text(successMessage),
-                actions: <Widget>[
-                  CupertinoDialogAction(
-                    child: Text(CommonString.OK),
-                    onPressed: () {
-                      Navigator.pop(context, DomainProvider.SUCCESS);
-                      sink?.close();
-                    },
-                  )
-                ],
-              );
-            } else if (data == DomainProvider.ERROR) {
-              return CupertinoAlertDialog(
-                title: Text(CommonString.ERROR),
-                content: Text(errorMessage),
-                actions: <Widget>[
-                  CupertinoDialogAction(
-                    child: Text(CommonString.OK),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      sink?.close();
-                    },
-                  )
-                ],
-              );
-            }
+          } else if (data.status == 0) {
+            return CupertinoAlertDialog(
+              title: Text(CommonString.SUCCESS),
+              content: Text(successMessage),
+              actions: <Widget>[
+                CupertinoDialogAction(
+                  child: Text(CommonString.OK),
+                  onPressed: () {
+                    Navigator.of(context).pop(data);
+                  },
+                )
+              ],
+            );
+          } else if (data.status == 1) {
+            return CupertinoAlertDialog(
+              title: Text(CommonString.ERROR),
+              content: Text(data.message),
+              actions: <Widget>[
+                CupertinoDialogAction(
+                  child: Text(CommonString.OK),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
           }
-
           return CupertinoAlertDialog(
             title: Text(CommonString.ERROR),
             content: Text(CommonString.ERROR_MESSAGE),
@@ -387,7 +429,6 @@ class Alert {
                 child: Text(CommonString.OK),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  sink?.close();
                 },
               )
             ],

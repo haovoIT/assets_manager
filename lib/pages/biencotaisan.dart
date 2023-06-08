@@ -173,7 +173,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                                       email,
                                       name,
                                       "Ngừng Sử Dụng");
-                                  PdfApi.openFile(pdfFile);
+                                  PdfApi.openFile(pdfFile, context);
                                 },
                                 child: Text(
                                   "Ngừng Sử dụng",
@@ -183,7 +183,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                                 onPressed: () async {
                                   final pdfFile = await PdfDSTaiSanApi.generate(
                                       listAssetMM, email, name, "Mất Mát");
-                                  PdfApi.openFile(pdfFile);
+                                  PdfApi.openFile(pdfFile, context);
                                 },
                                 child: Text("Mất Mát",
                                     style: TextStyle(color: Colors.black))),
@@ -191,7 +191,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                                 onPressed: () async {
                                   final pdfFile = await PdfDSTaiSanApi.generate(
                                       listAssetHH, email, name, "Hư Hỏng");
-                                  PdfApi.openFile(pdfFile);
+                                  PdfApi.openFile(pdfFile, context);
                                 },
                                 child: Text("Hư Hỏng",
                                     style: TextStyle(color: Colors.black))),
@@ -199,7 +199,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                                 onPressed: () async {
                                   final pdfFile = await PdfDSTaiSanApi.generate(
                                       listAsset, email, name, "Biến Cố");
-                                  PdfApi.openFile(pdfFile);
+                                  PdfApi.openFile(pdfFile, context);
                                 },
                                 child: Text("Tất cả",
                                     style: TextStyle(color: Colors.black))),
@@ -439,7 +439,7 @@ class _BienCoTaiSansState extends State<BienCoTaiSans>
                                 final pdfFile = await PdfThongTinTSApi.generate(
                                     assets, email, name);
 
-                                PdfApi.openFile(pdfFile);
+                                PdfApi.openFile(pdfFile, context);
                               },
                               child: Text(
                                 'IN PDF',

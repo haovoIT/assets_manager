@@ -1,5 +1,6 @@
 class AssetsModel {
   String? documentID;
+  String? code;
   String? nameAsset;
   String? idDepartment;
   String? departmentName;
@@ -21,6 +22,7 @@ class AssetsModel {
 
   AssetsModel(
       {this.documentID,
+      this.code,
       this.nameAsset,
       this.idDepartment,
       this.departmentName,
@@ -39,9 +41,32 @@ class AssetsModel {
       this.endDate,
       this.depreciation,
       this.dateCreate});
+
   factory AssetsModel.fromDoc(dynamic doc) => AssetsModel(
         documentID: doc.id,
         nameAsset: doc['nameAsset'],
+        code: doc['code'],
+        idDepartment: doc['idDepartment'],
+        departmentName: doc['departmentName'],
+        yearOfManufacture: doc['yearOfManufacture'],
+        producingCountry: doc['producingCountry'],
+        assetGroupName: doc['assetGroupName'],
+        status: doc['status'],
+        originalPrice: doc['originalPrice'],
+        usedTime: doc['usedTime'],
+        amount: doc['amount'],
+        contractName: doc['contractName'],
+        purposeOfUsing: doc['purposeOfUsing'],
+        qrCode: doc['qrCode'],
+        userId: doc['userId'],
+        starDate: doc['starDate'] ?? "",
+        endDate: doc['endDate'] ?? "",
+        depreciation: doc['depreciation'] ?? "",
+        dateCreate: doc['dateCreate'] ?? "",
+      );
+  factory AssetsModel.fromDocID(dynamic doc) => AssetsModel(
+        nameAsset: doc['nameAsset'],
+        code: doc['code'],
         idDepartment: doc['idDepartment'],
         departmentName: doc['departmentName'],
         yearOfManufacture: doc['yearOfManufacture'],

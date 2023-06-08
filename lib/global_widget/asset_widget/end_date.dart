@@ -1,11 +1,10 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
 import 'package:assets_manager/component/index.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EndDate extends StatelessWidget {
-  EndDate({Key? key, this.assetsEditBloc}) : super(key: key);
-  final AssetsEditBloc? assetsEditBloc;
+  EndDate({Key? key, required this.stream}) : super(key: key);
+  final Stream<String>? stream;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class EndDate extends StatelessWidget {
         color: Colors.white,
       ),
       child: StreamBuilder(
-        stream: assetsEditBloc?.endDateEdit,
+        stream: stream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Container();

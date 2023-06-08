@@ -47,6 +47,18 @@ class Validators {
     return null;
   }
 
+  String? checkUpdateValueAsset(
+      String? haveOriginalPrice,
+      String? newOriginalPrice,
+      String? haveUsedTime,
+      String? newUsedTime,
+      String? message) {
+    if (haveOriginalPrice == newOriginalPrice && haveUsedTime == newUsedTime) {
+      return message;
+    }
+    return null;
+  }
+
   String? checkForNoDuplicates(String? valueCheck, String? valueDuplicate,
       Map<String, dynamic> message) {
     if (valueCheck!.isEmpty) {

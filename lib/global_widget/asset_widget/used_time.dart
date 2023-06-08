@@ -1,22 +1,21 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
 import 'package:assets_manager/component/index.dart';
 import 'package:assets_manager/global_widget/select_user_time.dart';
 import 'package:flutter/material.dart';
 
 class UsedTime extends StatelessWidget {
-  UsedTime(
-      {Key? key,
-      this.assetsEditBloc,
-      required this.usedTimeController,
-      required this.userTimes,
-      required this.onChangedFunction,
-      required this.flag})
-      : super(key: key);
-  final AssetsEditBloc? assetsEditBloc;
+  UsedTime({
+    Key? key,
+    required this.usedTimeController,
+    this.userTimes,
+    required this.onChangedFunction,
+    required this.stream,
+    this.readOnly,
+  }) : super(key: key);
+  final Stream<String>? stream;
+  final readOnly;
   final TextEditingController usedTimeController;
   final onChangedFunction;
-  int userTimes;
-  bool flag;
+  int? userTimes;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,7 @@ class UsedTime extends StatelessWidget {
           ),
           color: Colors.white),
       child: StreamBuilder(
-        stream: assetsEditBloc?.usedTimeEdit,
+        stream: stream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Container();

@@ -1,36 +1,26 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
+import 'dart:async';
+
 import 'package:assets_manager/component/index.dart';
 import 'package:assets_manager/global_widget/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 
-class OriginalPrice extends StatefulWidget {
+class OriginalPrice extends StatelessWidget {
   OriginalPrice(
       {Key? key,
-      this.assetsEditBloc,
       required this.originalPriceController,
-      required this.flag})
+      required this.stream,
+      required this.onChangeFunction,
+      this.readOnly})
       : super(key: key);
-  final AssetsEditBloc? assetsEditBloc;
   final TextEditingController originalPriceController;
-  final bool flag;
+  final bool? readOnly;
+  final Stream<String>? stream;
+  final onChangeFunction;
 
-  @override
-  State<OriginalPrice> createState() =>
-      _OriginalPriceState(assetsEditBloc, originalPriceController, flag);
-}
-
-class _OriginalPriceState extends State<OriginalPrice> {
-  final AssetsEditBloc? assetsEditBloc;
-  final TextEditingController originalPriceController;
-  bool flag;
-
-  _OriginalPriceState(
-      this.assetsEditBloc, this.originalPriceController, this.flag);
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: assetsEditBloc?.originalPriceEdit,
+      stream: stream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (!snapshot.hasData) {
           return Container();
@@ -38,16 +28,16 @@ class _OriginalPriceState extends State<OriginalPrice> {
         originalPriceController.value =
             originalPriceController.value.copyWith(text: snapshot.data);
         return CustomTextFromField(
-          readOnly: flag ? false : true,
-          fillColor: flag ? AppColors.white : AppColors.gray,
+          readOnly: readOnly ?? false,
+          fillColor: readOnly != null && readOnly == true
+              ? AppColors.gray
+              : AppColors.white,
           inputType: TextInputType.number,
-          inputAction: TextInputAction.done,
+          inputAction: TextInputAction.next,
           controller: originalPriceController,
           labelText: AssetString.ORIGINAL_PRICE,
           prefixIcon: Icons.price_change_outlined,
-          onChangeFunction: (originalPrice) => assetsEditBloc
-              ?.originalPriceEditChanged
-              .add(Alert.getOnlyNumbers(originalPrice).toVND()),
+          onChangeFunction: onChangeFunction /**/,
         );
       },
     );

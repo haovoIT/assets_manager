@@ -1,6 +1,7 @@
 class HistoryAssetModel {
   String? documentID;
   String? nameAsset;
+  String? code;
   String? idAsset;
   String? idDepartment;
   String? departmentName;
@@ -26,6 +27,7 @@ class HistoryAssetModel {
   HistoryAssetModel({
     this.documentID,
     this.nameAsset,
+    required this.code,
     this.idAsset,
     this.idDepartment,
     this.departmentName,
@@ -51,6 +53,7 @@ class HistoryAssetModel {
   factory HistoryAssetModel.fromDoc(dynamic doc) => HistoryAssetModel(
       documentID: doc.id,
       nameAsset: doc['nameAsset'],
+      code: doc['code'],
       idAsset: doc['idAsset'],
       idDepartment: doc['idDepartment'],
       departmentName: doc['departmentName'],

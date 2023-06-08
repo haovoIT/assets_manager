@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:assets_manager/models/history_asset_model.dart';
+import 'package:assets_manager/models/base_response.dart';
 import 'package:assets_manager/services/db_authentic_api.dart';
 import 'package:assets_manager/services/db_history_asset_api.dart';
 
@@ -17,11 +17,11 @@ class HistoryAssetBloc {
   Sink<String> get qrCodeEditChanged => _qrCodeController.sink;
   Stream<String> get qrCodeEdit => _qrCodeController.stream;
 
-  final StreamController<List<HistoryAssetModel>> _historyAssetIDController =
-      StreamController<List<HistoryAssetModel>>.broadcast();
-  Sink<List<HistoryAssetModel>> get addListIDHistoryAsset =>
+  final StreamController<BaseResponse> _historyAssetIDController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get addListIDHistoryAsset =>
       _historyAssetIDController.sink;
-  Stream<List<HistoryAssetModel>> get listIDHistoryAsset =>
+  Stream<BaseResponse> get listIDHistoryAsset =>
       _historyAssetIDController.stream;
 
   void _starListeners() {

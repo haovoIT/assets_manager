@@ -137,7 +137,7 @@ class _ThanhLyPagesState extends State<ThanhLyPages> {
               onPressed: () async {
                 final pdfFile =
                     await PdfDSThanhLyApi.generate(listThanhLy, email, name);
-                PdfApi.openFile(pdfFile);
+                PdfApi.openFile(pdfFile, context);
               },
               icon: Icon(
                 Icons.print,

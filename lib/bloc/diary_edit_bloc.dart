@@ -1,15 +1,22 @@
 import 'dart:async';
 
+import 'package:assets_manager/models/asset_model.dart';
+import 'package:assets_manager/models/base_response.dart';
 import 'package:assets_manager/models/diary_model.dart';
-import 'package:assets_manager/services/db_diary_api.dart';
+import 'package:assets_manager/services/service_index.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class DiaryEditBloc {
   final DbDiaryApi dbDiaryApi;
+  final DbApi dbApi;
   final bool add;
   DiaryModel selectDiaryModel;
 
-  DiaryEditBloc(this.dbDiaryApi, this.add, this.selectDiaryModel) {
+  DiaryEditBloc(
+      {required this.dbDiaryApi,
+      required this.add,
+      required this.dbApi,
+      required this.selectDiaryModel}) {
     _startEditListeners()
         .then((finished) => _getDiaryModel(add, selectDiaryModel));
   }
@@ -68,6 +75,11 @@ class DiaryEditBloc {
   Sink<String> get depreciationEditChanged => _depreciationController.sink;
   Stream<String> get depreciationEdit => _depreciationController.stream;
 
+  final StreamController<BaseResponse> _responseController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get responseEditChanged => _responseController.sink;
+  Stream<BaseResponse> get responseEdit => _responseController.stream;
+
   _startEditListeners() async {
     _nameAssetController.stream.listen((nameAsset) {
       selectDiaryModel.nameAsset = nameAsset;
@@ -114,13 +126,30 @@ class DiaryEditBloc {
       selectDiaryModel = DiaryModel();
       selectDiaryModel.qrCode = diaryModel.qrCode;
       selectDiaryModel.nameAsset = diaryModel.nameAsset;
+      selectDiaryModel.idAsset = diaryModel.idAsset;
+      selectDiaryModel.dateCreate = diaryModel.dateCreate;
       selectDiaryModel.idDepartment = diaryModel.idDepartment;
       selectDiaryModel.usedTime = diaryModel.usedTime;
       selectDiaryModel.originalPrice = diaryModel.originalPrice;
       selectDiaryModel.starDate = diaryModel.starDate;
       selectDiaryModel.endDate = diaryModel.endDate;
       selectDiaryModel.depreciation = diaryModel.depreciation;
-      selectDiaryModel.detail = diaryModel.detail;
+      selectDiaryModel.detail = "";
+      selectDiaryModel.userName = diaryModel.userName;
+      selectDiaryModel.userEmail = diaryModel.userEmail;
+      selectDiaryModel.dateUpdate = diaryModel.dateUpdate;
+    } else {
+      selectDiaryModel.qrCode = diaryModel.qrCode;
+      selectDiaryModel.nameAsset = diaryModel.nameAsset;
+      selectDiaryModel.idAsset = diaryModel.idAsset;
+      selectDiaryModel.dateCreate = diaryModel.dateCreate;
+      selectDiaryModel.idDepartment = diaryModel.idDepartment;
+      selectDiaryModel.usedTime = diaryModel.usedTime;
+      selectDiaryModel.originalPrice = diaryModel.originalPrice;
+      selectDiaryModel.starDate = diaryModel.starDate;
+      selectDiaryModel.endDate = diaryModel.endDate;
+      selectDiaryModel.depreciation = diaryModel.depreciation;
+      selectDiaryModel.detail = "";
       selectDiaryModel.userName = diaryModel.userName;
       selectDiaryModel.userEmail = diaryModel.userEmail;
       selectDiaryModel.dateUpdate = diaryModel.dateUpdate;
@@ -136,13 +165,16 @@ class DiaryEditBloc {
     detailEditChanged.add(selectDiaryModel.detail ?? "");
   }
 
-  void _saveDiaryModel() {
-    idDepartment = displayName!.length > 20 ? displayName!.substring(0, 20) : '';
+  void _saveDiaryModel() async {
+    idDepartment =
+        displayName!.length > 20 ? displayName!.substring(0, 20) : '';
     name = displayName!.length > 20
         ? displayName!.substring(21, displayName!.length)
         : displayName!;
     DiaryModel diaryModel = DiaryModel(
         qrCode: selectDiaryModel.qrCode,
+        dateCreate: DateTime.now().toString(),
+        idAsset: selectDiaryModel.idAsset,
         nameAsset: selectDiaryModel.nameAsset,
         idDepartment: selectDiaryModel.idDepartment,
         usedTime: selectDiaryModel.usedTime,
@@ -154,7 +186,25 @@ class DiaryEditBloc {
         userName: name,
         userEmail: email ?? "",
         dateUpdate: DateTime.now().toString());
-    dbDiaryApi.addDiaryModel(diaryModel);
+    final responseAddDiary = await dbDiaryApi.addDiaryModel(diaryModel);
+    if (responseAddDiary.status == 0) {
+      final response =
+          await dbApi.getAssets(documentID: selectDiaryModel.idAsset ?? "");
+      if (response?.status == 0) {
+        AssetsModel assetsModel = response?.data;
+
+        assetsModel.documentID = selectDiaryModel.idAsset;
+        assetsModel.originalPrice = selectDiaryModel.originalPrice;
+        assetsModel.usedTime = selectDiaryModel.usedTime;
+        assetsModel.endDate = selectDiaryModel.endDate;
+        assetsModel.depreciation = selectDiaryModel.depreciation;
+        final responseUpdateAsset =
+            await dbApi.updateAssetWithTransaction(assets: assetsModel);
+        responseEditChanged.add(responseUpdateAsset!);
+      }
+    } else {
+      responseEditChanged.add(responseAddDiary);
+    }
   }
 
   void dispose() {
@@ -168,5 +218,6 @@ class DiaryEditBloc {
     _qrCodeController.close();
     _saveController.close();
     _detailController.close();
+    _responseController.close();
   }
 }

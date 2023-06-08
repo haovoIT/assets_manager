@@ -10,13 +10,13 @@ class DiaryModel {
   String? endDate;
   String? depreciation;
   String? detail;
-    String? userName;
+  String? userName;
   String? userEmail;
   String? dateUpdate;
   String? dateCreate;
 
   DiaryModel({
-     this.documentID,
+    this.documentID,
     this.nameAsset,
     this.idAsset,
     this.idDepartment,
@@ -33,21 +33,20 @@ class DiaryModel {
     this.dateCreate,
   });
   factory DiaryModel.fromDoc(dynamic doc) => DiaryModel(
-       documentID: doc.id,
-      nameAsset: doc['nameAsset'],
-      idAsset: doc['idAsset'],
-      idDepartment: doc['idDepartment'],
-      originalPrice: doc['originalPrice'],
-      usedTime: doc['usedTime'],
-      qrCode: doc['qrCode'],
-      starDate: doc['starDate'] ?? "",
-      endDate: doc['endDate'] ?? "",
-      depreciation: doc['depreciation'] ?? "",
-      userName: doc['userName'],
-      userEmail: doc['userEmail'],
-      dateUpdate: doc['dateUpdate'],
-      detail: doc['detail'],
-      dateCreate: doc['dateCreate'],
-  
+        documentID: doc.id,
+        nameAsset: doc['nameAsset'],
+        idAsset: doc['idAsset'],
+        idDepartment: doc['idDepartment'],
+        originalPrice: doc['originalPrice'],
+        usedTime: doc['usedTime'],
+        qrCode: doc['qrCode'],
+        starDate: doc['starDate'] ?? "",
+        endDate: doc['endDate'] ?? "",
+        depreciation: doc['depreciation'] ?? "",
+        userName: doc['userName'],
+        userEmail: doc['userEmail'],
+        dateUpdate: doc['dateUpdate'],
+        detail: doc['detail'],
+        dateCreate: doc['dateCreate'],
       );
 }

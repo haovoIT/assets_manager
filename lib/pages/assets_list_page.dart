@@ -1,14 +1,9 @@
-import 'package:assets_manager/bloc/assets_edit_bloc.dart';
-import 'package:assets_manager/bloc/assets_edit_bloc_provider.dart';
 import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/bloc/home_bloc.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
-import 'package:assets_manager/models/asset_model.dart';
-import 'package:assets_manager/pages/assets_convert_page.dart';
 import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_diary.dart';
 import 'package:assets_manager/services/db_history_asset.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
@@ -226,48 +221,5 @@ class _AssetsPageListsState extends State<AssetsPageLists> {
             color: Colors.white,
           );
         });
-  }
-
-  Future chuyendoi(bool isFull, AssetsModel assets) async {
-    if (isFull) {
-      print("$isFull");
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) => AssetsEditBlocProvider(
-                  assetsEditBloc: AssetsEditBloc(
-                    add: false,
-                    dbApi: DbFirestoreService(),
-                    dbHistoryAssetApi: DbHistoryAssetService(),
-                    dbDiaryApi: DbDiaryService(),
-                    selectAsset: assets,
-                  ),
-                  child: AssetConvertPage(
-                    flag: true,
-                    assetsModel: assets,
-                  ),
-                ),
-            fullscreenDialog: true),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) => AssetsEditBlocProvider(
-                  assetsEditBloc: AssetsEditBloc(
-                    add: false,
-                    dbApi: DbFirestoreService(),
-                    dbHistoryAssetApi: DbHistoryAssetService(),
-                    dbDiaryApi: DbDiaryService(),
-                    selectAsset: assets,
-                  ),
-                  child: AssetConvertPage(
-                    flag: false,
-                    assetsModel: assets,
-                  ),
-                ),
-            fullscreenDialog: true),
-      );
-    }
   }
 }

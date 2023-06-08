@@ -14,6 +14,40 @@ abstract class CommonString {
       "Đã gửi email thành công.\n Vui lòng kiểm tra Email để Đổi mật khẩu mới.";
   static const String UPDATE_PASSWORD_MASSAGE =
       "Đã cập nhật mật khẩu thành công.";
+  static const String ERROR_MASSAGE_UPDATE_VALUE_ASSET =
+      "Nguyên Giá hoặc Thời gian sử dụng phải cập nhật mới";
+}
+
+abstract class MassageDbString {
+  static const String ADD_ASSET_SUCCESS = "Thêm Tài Sản Thành Công";
+  static const String ADD_ASSET_ERROR = "Thêm Tài Sản Thất Bại";
+  static const String ADD_ASSET_ERROR_DUPLICATE = "Mã Tài Sản Đã Tồn Tại";
+  static const String ADD_DIARY_SUCCESS = "Thêm Khấu Hao Thành Công";
+  static const String ADD_DIARY_ERROR = "Thêm Khấu Hao Thất Bại";
+  static const String ADD_HISTORY_ASSET_SUCCESS =
+      "Thêm Lịch Sử Tài Sản Thành Công";
+  static const String ADD_HISTORY_ASSET_ERROR = "Thêm Lịch Sử Tài Sản Thất Bại";
+  static const String GET_ASSET_TO_ID_SUCCESS =
+      "Lấy Thông Tin Tài Sản Thành Công";
+  static const String GET_ASSET_TO_ID_ERROR = "Lấy Thông Tin Tài Sản Thất Bại";
+  static const String GET_LIST_ASSET_SUCCESS =
+      "Lấy Danh Sách Tài Sản Thành Công";
+  static const String GET_LIST_ASSET_ERROR = "Lấy Danh Sách Tài Sản Thất Bại";
+  static const String GET_LIST_DIARY_SUCCESS =
+      "Lấy Danh Sách Khấu Hao Thành Công";
+  static const String GET_LIST_DIARY_ERROR = "Lấy Danh Sách Khấu Hao Thất Bại";
+  static const String GET_LIST_HISTORY_ASSET_SUCCESS =
+      "Lấy Danh Sách Lịch Sử Tài Sản Thành Công";
+  static const String GET_LIST_HISTORY_ASSET_ERROR =
+      "Lấy Danh Sách Lịch Sử Tài Sản Thất Bại";
+  static const String UPDATE_ASSET_SUCCESS = "Cập Nhật Tài Sản Thành Công";
+  static const String UPDATE_ASSET_ERROR = "Cập Nhật Tài Sản Thất Bại";
+  static const String UPDATE_DIARY_SUCCESS = "Cập Nhật Khấu Hao Thành Công";
+  static const String UPDATE_DIARY_ERROR = "Cập Nhật Khấu Hao Thất Bại";
+  static const String DELETE_ASSET_SUCCESS = "Xóa Tài Sản Thành Công";
+  static const String DELETE_ASSET_ERROR = "Xóa Tài Sản Thất Bại";
+  static const String DELETE_DIARY_SUCCESS = "Xóa Khấu Hao Thành Công";
+  static const String DELETE_DIARY_ERROR = "Xóa Khấu Hao Thất Bại";
 }
 
 abstract class SplashString {
@@ -51,16 +85,21 @@ abstract class HomeString {
 }
 
 abstract class AssetString {
+  static const String TITLE = "QUẢN LÝ TÀI SẢN";
   static const String EDIT_TITLE = "Thông Tin Tài sản";
   static const String CONVERT_TITLE = "Chuyển Đổi Tài sản";
   static const String HISTORY_TITLE = "Lịch Sử Sử Dụng";
-  static const String Liquidation_TITLE = "Xác Nhận Thanh Lý";
+  static const String LIQUIDATION_TITLE = "Xác Nhận Thanh Lý";
+  static const String DEPRECIATION_TRACKING_TITLE = "Sổ Theo dõi Khấu hao";
   static const String ASSET = "Tài Sản";
   static const String DEPARTMENT = "Phòng Ban";
   static const String DEPARTMENTS = "Phòng Ban: ";
   static const String DEPRECIATION = "Khấu Hao";
+  static const String DEPRECIATION_ASSETS = "Khấu Hao Tài Sản";
   static const String UTILITIES = "Thêm";
   static const String LABEL_TEXT_NAME_ASSETS = "Tên Tài sản";
+  static const String LABEL_TEXT_CODE = "Mã Tài sản";
+  static const String LABEL_TEXT_DEPRECIATION = "Khấu Hao";
   static const String CHOOSE_DEPARTMENT = "Chọn Phòng Ban";
   static const String YEAR_OF_MANUFACTURE = "Ngày sản xuất:   ";
   static const String PRODUCING_COUNTRY = "Nước sản xuất";
@@ -77,11 +116,18 @@ abstract class AssetString {
   static const String AMOUNT_CONVERT = "Số lượng muốn chuyển";
   static const String STATUS = "Tình Trạng:  ";
   static const String CHOOSE_STATUS = "Chọn Tình Trạng";
+  static const String DETAIL = "Lý Do:  ";
+  static const String CHOOSE_DETAIL = "Chọn Lý Do";
   static const List<String> LIST_STATUS = [
     "Đang Sử Dụng",
     "Ngừng Sử Dụng",
     "Mất Mát",
     "Hư Hỏng"
+  ];
+  static const List<String> LIST_DETAIL = [
+    "Nâng Cấp Tài Sản",
+    "Định Lại Tài Sản",
+    "Chuyển Đổi Phòng Ban"
   ];
   static const String PURPOSE_OF_USING = "Mục đích sử dụng";
   static const String REQUIRE_NAME_ASSETS = " Vui lòng nhập Tên Tài Sản";
@@ -92,6 +138,7 @@ abstract class AssetString {
       " Vui lòng nhập Nước Sản Xuất";
   static const String REQUIRE_ORIGINAL_PRICE = " Vui lòng nhập Nguyên Giá";
   static const String REQUIRE_AMOUNT = " Vui lòng nhập Số Lượng";
+  static const String REQUIRE_DETAIL = " Vui lòng Chọn Lý do";
   static const String REQUIRE_CHOOSE_CONTRACT_NAME = " Vui lòng chọn Hợp Đồng ";
   static const String REQUIRE_STATUS = " Vui lòng chọn Tình Trạng ";
   static const String REQUIRE_PURPOSE_OF_USING =
@@ -109,6 +156,13 @@ abstract class AssetString {
   static const String CONVERT_ERROR_MASSAGE = "Chuyển đổi tài sản thất bại.";
   static const String UPDATE_SUCCESS_MASSAGE = "Cập nhật tài sản thành công.";
   static const String UPDATE_ERROR_MASSAGE = "Cập nhật tài sản thất bại.";
+  static const String UPDATE_VALUE_SUCCESS_MASSAGE =
+      "Nâng Cấp tài sản thành công.";
+  static const String UPDATE_VALUE_ERROR_MASSAGE = "Nâng cấp tài sản thất bại.";
+  static const String CONFIRM_CONVERT_SUCCESS_MASSAGE =
+      "Xác nhận chuyển đổi thành công.";
+  static const String CONFIRM_CONVERT_ERROR_MASSAGE =
+      "Xác nhận chuyển đổi thất bại.";
   static const String CHOOSE_TO_DEPARTMENT = "Từ Phòng Ban";
   static const String CHOOSE_FROM_DEPARTMENT = "Chọn Phòng Ban đến";
   static const String QUESTION_AMOUNT_CONVERT = "Bạn muốn chuyển bao nhiêu?";
@@ -146,6 +200,16 @@ abstract class AssetString {
   static const String INFO_TIME_UPDATE = 'Thời Gian Cập Nhật';
   static const String INFO_START_DATE = 'Ngày Bắt Đầu';
   static const String INFO_END_DATE = 'Ngày Kết Thúc';
+  static const String INFO_DETAIL = 'Lý Do';
+  static const String INFO_DEPRECIATION = 'Mức Khấu Hao';
+  static const String INFO_ASSET_PART = 'Phần Thông Tin Tài Sản';
+  static const String INFO_DEPRECIATION_PART = 'Phần Thông Tin Khấu hao';
+  static const String INFO_DEPRECIATION_MOUNT = 'Mức Khấu Hao Hàng Tháng';
+  static const String INFO_ACCUMULATED_DEPRECIATION = 'Khấu Hao Lũy Kế';
+  static const String INFO_RESIDUAL_VALUE = 'Giá Trị Còn Lại';
+  static const String BUTTON_TEXT_UPDATE_ASSET = 'Nâng Cấp Tài Sản';
+  static const String BUTTON_TEXT_LIQUIDATION = 'Xác Nhận Thanh Lý';
+  static const String BUTTON_TEXT_CONTINUE = 'Tiếp Tục';
 }
 
 abstract class AppString {

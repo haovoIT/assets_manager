@@ -134,7 +134,7 @@ class _NhaCungCapPagesState extends State<NhaCungCapPages> {
               onPressed: () async {
                 final pdfFile = await PdfDSNhaCungCapApi.generate(
                     listNhaCungCap, email, name);
-                PdfApi.openFile(pdfFile);
+                PdfApi.openFile(pdfFile, context);
               },
               icon: Icon(
                 Icons.print,
