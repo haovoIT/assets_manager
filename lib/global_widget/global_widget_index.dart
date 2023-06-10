@@ -1,5 +1,4 @@
 export 'appbar_custom.dart';
-export 'asset_widget/index.dart';
 export 'button_custom.dart';
 export 'custom_text_form_field.dart';
 export 'password_custom.dart';

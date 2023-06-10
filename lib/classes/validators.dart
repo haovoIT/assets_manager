@@ -32,6 +32,21 @@ class Validators {
     return null;
   }
 
+  String? tel(String? value, Map<String, dynamic> message) {
+    if (value!.isEmpty) {
+      return message['EMPTY_TEL'];
+    }
+
+    if (value.length > 16 || value.length < 9) return message['VALID_TEL'];
+
+    String pattern = r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$';
+    RegExp regex = RegExp(pattern);
+    if (!regex.hasMatch(value))
+      return message['VALID_TEL'];
+    else
+      return null;
+  }
+
   String? checkForDuplicates(String? valueCheck, String? valueDuplicate,
       Map<String, dynamic> message) {
     if (valueCheck!.isEmpty) {

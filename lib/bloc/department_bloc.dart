@@ -1,36 +1,38 @@
 import 'dart:async';
 
-import 'package:assets_manager/models/phongban.dart';
+import 'package:assets_manager/models/base_response.dart';
+import 'package:assets_manager/models/model_index.dart';
 import 'package:assets_manager/services/db_authentic_api.dart';
-import 'package:assets_manager/services/db_phongban_api.dart';
+import 'package:assets_manager/services/db_department_api.dart';
 
 class DepartmentBloc {
-  final DbDpmApi dbDpmApi;
+  final DbDepartmentApi dbDepartmentApi;
   final AuthenticationApi authenticationApi;
 
-  DepartmentBloc(this.dbDpmApi, this.authenticationApi) {
+  DepartmentBloc(this.dbDepartmentApi, this.authenticationApi) {
     _startListeners();
   }
 
-  final StreamController<List<Department>> _departmentController =
-      StreamController<List<Department>>.broadcast();
-  Sink<List<Department>> get _addListDepartment => _departmentController.sink;
-  Stream<List<Department>> get listDepartment => _departmentController.stream;
+  final StreamController<BaseResponse> _departmentController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get _addListDepartment => _departmentController.sink;
+  Stream<BaseResponse> get listDepartment => _departmentController.stream;
 
-  final StreamController<Department> _departmentDeleteController =
-      StreamController<Department>.broadcast();
-  Sink<Department> get deleteDepartment => _departmentDeleteController.sink;
+  final StreamController<DepartmentModel> _departmentDeleteController =
+      StreamController<DepartmentModel>.broadcast();
+  Sink<DepartmentModel> get deleteDepartment =>
+      _departmentDeleteController.sink;
 
   final StreamController<String> _tenPbController =
       StreamController<String>.broadcast();
   Sink<String> get tenPbEditChanged => _tenPbController.sink;
   Stream<String> get tenPbEdit => _tenPbController.stream;
 
-  final StreamController<List<Department>> _departmentNameController =
-      StreamController<List<Department>>.broadcast();
-  Sink<List<Department>> get _addListNameDepartment =>
+  final StreamController<BaseResponse> _departmentNameController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get _addListNameDepartment =>
       _departmentNameController.sink;
-  Stream<List<Department>> get listNameDepartment =>
+  Stream<BaseResponse> get listNameDepartment =>
       _departmentNameController.stream;
 
   void _startListeners() {
@@ -42,16 +44,16 @@ class DepartmentBloc {
         dbApi.deleteAsset(assets);
       });
     });*/
-    dbDpmApi.getDepartmentList().listen((departmentDocs) {
-      _addListDepartment.add(departmentDocs);
+    dbDepartmentApi.getDepartmentList().listen((departmentDocs) {
+      _addListDepartment.add(departmentDocs!);
     });
     _departmentDeleteController.stream.listen((department) {
-      dbDpmApi.deleteDepartment(department);
+      dbDepartmentApi.deleteDepartment(departmentModel: department);
     });
 
     _tenPbController.stream.listen((tenPb) {
-      dbDpmApi.getTenDepartmentList(tenPb).listen((departmentDocs) {
-        _addListNameDepartment.add(departmentDocs);
+      dbDepartmentApi.getTenDepartmentList(tenPb).listen((departmentDocs) {
+        _addListNameDepartment.add(departmentDocs!);
       });
     });
   }

@@ -9,6 +9,8 @@ import 'package:assets_manager/global_widget/global_widget_index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 
+import '../global_widget/asset_widget/index.dart';
+
 class UpdateValueAssetPage extends StatefulWidget {
   final double accumulatedDouble;
   final int numberMonths;
@@ -16,16 +18,15 @@ class UpdateValueAssetPage extends StatefulWidget {
   final String idDepartment;
   final String originalPrice;
   final String usedTime;
-  const UpdateValueAssetPage(
-      {Key? key,
-      required this.accumulatedDouble,
-      required this.numberMonths,
-      required this.flag,
-      required this.idDepartment,
-      required this.originalPrice,
-      required this.usedTime,
-      })
-      : super(key: key);
+  const UpdateValueAssetPage({
+    Key? key,
+    required this.accumulatedDouble,
+    required this.numberMonths,
+    required this.flag,
+    required this.idDepartment,
+    required this.originalPrice,
+    required this.usedTime,
+  }) : super(key: key);
 
   @override
   _UpdateValueAssetPageState createState() => _UpdateValueAssetPageState();
@@ -49,7 +50,7 @@ class _UpdateValueAssetPageState extends State<UpdateValueAssetPage> {
   @override
   void initState() {
     super.initState();
-    userTimeInt= int.parse(widget.usedTime);
+    userTimeInt = int.parse(widget.usedTime);
     _originalPriceController = MoneyMaskedTextControllers(
       thousandSeparator: '.',
       initialValue: 0,

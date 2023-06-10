@@ -1,47 +1,61 @@
 import 'dart:async';
 
-import 'package:assets_manager/models/phongban.dart';
-import 'package:assets_manager/services/db_phongban_api.dart';
+import 'package:assets_manager/models/base_response.dart';
+import 'package:assets_manager/models/department_model.dart';
+import 'package:assets_manager/services/db_department_api.dart';
 
 class DepartmentEditBloc {
-  final DbDpmApi dbDpmApi;
+  final DbDepartmentApi dbDpmApi;
   final bool add;
-  Department selectDepartment;
+  DepartmentModel selectDepartment;
 
   DepartmentEditBloc(this.add, this.dbDpmApi, this.selectDepartment) {
     _startEditListeners()
         .then((finished) => _getDepartment(add, selectDepartment));
   }
 
-  final StreamController<String> _tenPbController =
+  final StreamController<String> _codeController =
       StreamController<String>.broadcast();
-  Sink<String> get tenPbEditChanged => _tenPbController.sink;
-  Stream<String> get tenPbEdit => _tenPbController.stream;
+  Sink<String> get codeEditChanged => _codeController.sink;
+  Stream<String> get codeEdit => _codeController.stream;
 
-  final StreamController<String> _sdtController =
+  final StreamController<String> _nameController =
       StreamController<String>.broadcast();
-  Sink<String> get sdtEditChanged => _sdtController.sink;
-  Stream<String> get sdtEdit => _sdtController.stream;
+  Sink<String> get nameEditChanged => _nameController.sink;
+  Stream<String> get nameEdit => _nameController.stream;
 
-  final StreamController<String> _dcController =
+  final StreamController<String> _phoneController =
       StreamController<String>.broadcast();
-  Sink<String> get dcEditChanged => _dcController.sink;
-  Stream<String> get dcEdit => _dcController.stream;
+  Sink<String> get phoneEditChanged => _phoneController.sink;
+  Stream<String> get phoneEdit => _phoneController.stream;
+
+  final StreamController<String> _addressController =
+      StreamController<String>.broadcast();
+  Sink<String> get addressEditChanged => _addressController.sink;
+  Stream<String> get addressEdit => _addressController.stream;
 
   final StreamController<String> _saveController =
       StreamController<String>.broadcast();
   Sink<String> get saveEditChanged => _saveController.sink;
   Stream<String> get saveEdit => _saveController.stream;
 
+  final StreamController<BaseResponse> _responseAddController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get responseAddEditChanged => _responseAddController.sink;
+  Stream<BaseResponse> get responseAddEdit => _responseAddController.stream;
+
   _startEditListeners() async {
-    _tenPbController.stream.listen((tenPb) {
-      selectDepartment.Ten_Pb = tenPb;
+    _nameController.stream.listen((name) {
+      selectDepartment.name = name;
     });
-    _sdtController.stream.listen((sdt) {
-      selectDepartment.SDT = sdt;
+    _codeController.stream.listen((code) {
+      selectDepartment.code = code;
     });
-    _dcController.stream.listen((dc) {
-      selectDepartment.DC = dc;
+    _phoneController.stream.listen((phone) {
+      selectDepartment.phone = phone;
+    });
+    _addressController.stream.listen((address) {
+      selectDepartment.address = address;
     });
     _saveController.stream.listen((action) {
       if (action == "Save") {
@@ -50,37 +64,61 @@ class DepartmentEditBloc {
     });
   }
 
-  void _getDepartment(bool add, Department department) {
+  void _getDepartment(bool add, DepartmentModel department) {
     if (add) {
-      selectDepartment = Department();
-      selectDepartment.Ten_Pb = '';
-      selectDepartment.SDT = '';
-      selectDepartment.DC = '';
+      selectDepartment = DepartmentModel();
+      selectDepartment.name = '';
+      selectDepartment.phone = '';
+      selectDepartment.address = '';
+      selectDepartment.code = '';
     } else {
-      selectDepartment.Ten_Pb = department.Ten_Pb;
-      selectDepartment.SDT = department.SDT;
-      selectDepartment.DC = department.DC;
+      selectDepartment.name = department.name;
+      selectDepartment.phone = department.phone;
+      selectDepartment.address = department.address;
+      selectDepartment.code = department.code;
     }
-    tenPbEditChanged.add(selectDepartment.Ten_Pb ?? "");
-    sdtEditChanged.add(selectDepartment.SDT ?? "");
-    dcEditChanged.add(selectDepartment.DC ?? "");
+    nameEditChanged.add(selectDepartment.name ?? "");
+    phoneEditChanged.add(selectDepartment.phone ?? "");
+    addressEditChanged.add(selectDepartment.address ?? "");
+    codeEditChanged.add(selectDepartment.code ?? "");
   }
 
-  void _saveDepartment() {
-    Department department = Department(
+  void _saveDepartment() async {
+    if (add) {
+      DepartmentModel department = DepartmentModel(
         documentID: selectDepartment.documentID,
-        Ten_Pb: selectDepartment.Ten_Pb,
-        SDT: selectDepartment.SDT,
-        DC: selectDepartment.DC);
-    add
-        ? dbDpmApi.addDepartment(department)
-        : dbDpmApi.updateDepartment(department);
+        name: selectDepartment.name,
+        phone: selectDepartment.phone,
+        address: selectDepartment.address,
+        code: selectDepartment.code,
+        status: "0",
+        dateCreate: DateTime.now().toString(),
+      );
+      final response =
+          await dbDpmApi.addDepartment(departmentModel: department);
+      responseAddEditChanged.add(response!);
+    } else {
+      DepartmentModel department = DepartmentModel(
+        documentID: selectDepartment.documentID,
+        name: selectDepartment.name,
+        phone: selectDepartment.phone,
+        address: selectDepartment.address,
+        code: selectDepartment.code,
+        status: selectDepartment.status,
+        dateCreate: selectDepartment.dateCreate,
+      );
+      final response =
+          await dbDpmApi.updateDepartment(departmentModel: department);
+      responseAddEditChanged.add(response!);
+    }
   }
 
   void dispose() {
-    _tenPbController.close();
-    _sdtController.close();
-    _dcController.close();
+    _nameController.close();
+    _phoneController.close();
+    _addressController.close();
     _saveController.close();
+    _codeController.close();
+    _responseAddController.close();
   }
 }

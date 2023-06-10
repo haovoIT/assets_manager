@@ -2,7 +2,7 @@ import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/pages/biencotaisan.dart';
 import 'package:assets_manager/pages/contractPage.dart';
-import 'package:assets_manager/pages/departmentsPage.dart';
+import 'package:assets_manager/pages/department_page.dart';
 import 'package:assets_manager/pages/gioithieu.dart';
 import 'package:assets_manager/pages/nhacungcapPage.dart';
 import 'package:assets_manager/pages/nhomtaisanPage.dart';

@@ -18,6 +18,7 @@ class CustomTextFromField extends StatelessWidget {
       this.label,
       this.prefixIcon,
       this.textCapitalization,
+      this.maxLines,
       this.readOnly,
       this.fillColor});
 
@@ -37,6 +38,7 @@ class CustomTextFromField extends StatelessWidget {
   final textCapitalization;
   final readOnly;
   final fillColor;
+  final maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class CustomTextFromField extends StatelessWidget {
         inputFormatCustom ?? FilteringTextInputFormatter.singleLineFormatter
       ],
       textAlign: TextAlign.start,
-      maxLines: 1,
+      maxLines: maxLines ?? 1,
       maxLength: maxLengthText ?? null,
       autofocus: false,
       keyboardType: inputType ?? TextInputType.text,

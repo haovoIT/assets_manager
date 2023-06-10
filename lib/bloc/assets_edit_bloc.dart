@@ -291,29 +291,30 @@ class AssetsEditBloc {
     name = displayName.length > 20
         ? displayName.substring(21, displayName.length)
         : displayName;
-    AssetsModel assets = AssetsModel(
-      documentID: selectAsset.documentID,
-      nameAsset: selectAsset.nameAsset,
-      code: selectAsset.code,
-      idDepartment: selectAsset.idDepartment,
-      departmentName: selectAsset.departmentName,
-      yearOfManufacture: selectAsset.yearOfManufacture,
-      producingCountry: selectAsset.producingCountry,
-      assetGroupName: selectAsset.assetGroupName,
-      status: selectAsset.status,
-      originalPrice: selectAsset.originalPrice,
-      usedTime: selectAsset.usedTime,
-      amount: selectAsset.amount,
-      contractName: selectAsset.contractName,
-      purposeOfUsing: selectAsset.purposeOfUsing,
-      qrCode: selectAsset.qrCode,
-      userId: userId,
-      starDate: selectAsset.starDate,
-      endDate: selectAsset.endDate,
-      dateCreate: DateTime.now().toString(),
-      depreciation: selectAsset.depreciation,
-    );
+
     if (add) {
+      AssetsModel assets = AssetsModel(
+        documentID: selectAsset.documentID,
+        nameAsset: selectAsset.nameAsset,
+        code: selectAsset.code,
+        idDepartment: selectAsset.idDepartment,
+        departmentName: selectAsset.departmentName,
+        yearOfManufacture: selectAsset.yearOfManufacture,
+        producingCountry: selectAsset.producingCountry,
+        assetGroupName: selectAsset.assetGroupName,
+        status: selectAsset.status,
+        originalPrice: selectAsset.originalPrice,
+        usedTime: selectAsset.usedTime,
+        amount: selectAsset.amount,
+        contractName: selectAsset.contractName,
+        purposeOfUsing: selectAsset.purposeOfUsing,
+        qrCode: selectAsset.qrCode,
+        userId: userId,
+        starDate: selectAsset.starDate,
+        endDate: selectAsset.endDate,
+        dateCreate: DateTime.now().toString(),
+        depreciation: selectAsset.depreciation,
+      );
       final responseAddAsset = await dbApi.addAssets(assets: assets);
       if (responseAddAsset != null && responseAddAsset.status == 0) {
         DiaryModel diary = DiaryModel(
@@ -366,6 +367,28 @@ class AssetsEditBloc {
         responseSaveEditChanged.add(responseAddAsset!);
       }
     } else {
+      AssetsModel assets = AssetsModel(
+        documentID: selectAsset.documentID,
+        nameAsset: selectAsset.nameAsset,
+        code: selectAsset.code,
+        idDepartment: selectAsset.idDepartment,
+        departmentName: selectAsset.departmentName,
+        yearOfManufacture: selectAsset.yearOfManufacture,
+        producingCountry: selectAsset.producingCountry,
+        assetGroupName: selectAsset.assetGroupName,
+        status: selectAsset.status,
+        originalPrice: selectAsset.originalPrice,
+        usedTime: selectAsset.usedTime,
+        amount: selectAsset.amount,
+        contractName: selectAsset.contractName,
+        purposeOfUsing: selectAsset.purposeOfUsing,
+        qrCode: selectAsset.qrCode,
+        userId: userId,
+        starDate: selectAsset.starDate,
+        endDate: selectAsset.endDate,
+        dateCreate: selectAsset.dateCreate,
+        depreciation: selectAsset.depreciation,
+      );
       final responseAsset =
           await dbApi.updateAssetWithTransaction(assets: assets);
       if (responseAsset != null && responseAsset.status == 0) {

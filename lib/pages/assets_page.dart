@@ -161,7 +161,6 @@ class _AssetsPageState extends State<AssetsPage> {
         itemCount: data.length,
         itemBuilder: (BuildContext context, int index) {
           final AssetsModel itemAssets = data[index];
-          String? _title = itemAssets.code;
           return Dismissible(
             key: Key(data[index].documentID),
             background: Container(
@@ -191,7 +190,7 @@ class _AssetsPageState extends State<AssetsPage> {
                 leading: Image.asset(
                   AppImages.imTitle,
                 ),
-                title: _itemTitle(_title ?? ""),
+                title: _itemTitle(itemAssets.code ?? ""),
                 subtitle: _itemSubTitle(item: itemAssets),
                 onTap: () {
                   _addOrEditAsset(
@@ -234,8 +233,8 @@ class _AssetsPageState extends State<AssetsPage> {
               } else if (direction.toString() ==
                   "DismissDirection.startToEnd") {
                 bool confirmDelete = await await Alert.showConfirm(context,
-                    title: AssetString.CONFIRM_TITLE_DELETE,
-                    detail: AssetString.CONTENT_CONFIRM_TITLE_DELETE,
+                    title: AssetString.TITLE_CONFIRM_DELETE,
+                    detail: AssetString.DETAIL_CONFIRM_DELETE,
                     btTextTrue: CommonString.CONTINUE,
                     btTextFalse: CommonString.CANCEL);
                 if (confirmDelete) {
@@ -247,9 +246,7 @@ class _AssetsPageState extends State<AssetsPage> {
           );
         },
         separatorBuilder: (BuildContext context, int index) {
-          return Divider(
-            color: Colors.white,
-          );
+          return GlobalStyles.sizedBoxHeight;
         });
   }
 
