@@ -4,9 +4,11 @@ import 'package:assets_manager/classes/money_format.dart';
 import 'package:assets_manager/classes/validators.dart';
 import 'package:assets_manager/component/index.dart';
 import 'package:assets_manager/global_widget/global_widget_index.dart';
-import 'package:assets_manager/pages/departmentList.dart';
+import 'package:assets_manager/pages/department_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
+
+import '../global_widget/asset_widget/index.dart';
 
 class AssetEditPage extends StatefulWidget {
   final bool flag;
@@ -79,17 +81,18 @@ class _AssetEditPageState extends State<AssetEditPage> {
   }
 
   onTap() async {
-    final String _departmentName = await Navigator.push(
+    final String? _departmentName = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => DepartmentsList(flag: true),
       ),
     );
-
-    _assetsEditBloc?.idDepartmentEditChanged
-        .add(_departmentName.substring(0, 20));
-    _assetsEditBloc?.departmentNameEditChanged
-        .add(_departmentName.substring(20, _departmentName.length));
+    if (_departmentName != null && _departmentName.isNotEmpty == true) {
+      _assetsEditBloc?.idDepartmentEditChanged
+          .add(_departmentName.substring(0, 20));
+      _assetsEditBloc?.departmentNameEditChanged
+          .add(_departmentName.substring(20, _departmentName.length));
+    }
   }
 
   onSave() {

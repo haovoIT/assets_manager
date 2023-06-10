@@ -11,6 +11,6 @@ export 'end_date.dart';
 export 'name_assets.dart';
 export 'original_price.dart';
 export 'producing_country.dart';
-export 'purposeOfUsing.dart';
+export 'purpose_of_using.dart';
 export 'start_date.dart';
 export 'used_time.dart';

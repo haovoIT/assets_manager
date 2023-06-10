@@ -6,11 +6,14 @@ import 'package:assets_manager/component/domain_service.dart';
 import 'package:assets_manager/component/global_styles.dart';
 import 'package:assets_manager/global_widget/text_field_login.dart';
 import 'package:assets_manager/models/base_response.dart';
+import 'package:assets_manager/models/model_index.dart';
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 import 'package:flutter_picker/Picker.dart';
+import 'package:intl/intl.dart';
 
 class Alert {
   static Duration duration = const Duration(seconds: 2);
@@ -493,6 +496,116 @@ class Alert {
           );
         });
   }
+
+  static Future<dynamic> showInfoAsset(
+      {required String title,
+      required AssetsModel assetsModel,
+      required BuildContext context}) {
+    Widget _textSubTitle(_titleDetail, _subtitleDetail) {
+      return Row(
+        children: [
+          Expanded(
+            child: Text(
+              _titleDetail,
+              style: TextStyle(fontSize: 16, color: AppColors.black),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              _subtitleDetail ?? "",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Thẻ Tài Sản Chi Tiết',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+          ),
+          content: SingleChildScrollView(
+            child: Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  BarcodeWidget(
+                    data: assetsModel.qrCode ?? "",
+                    barcode: Barcode.qrCode(),
+                    width: 200,
+                    height: 200,
+                    color: Colors.black,
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.only(left: 40.0),
+                  ),
+                  Divider(
+                    color: Colors.green,
+                  ),
+                  _textSubTitle(
+                      AssetString.INFO_NAME_ASSETS, assetsModel.nameAsset),
+                  GlobalStyles.divider,
+                  _textSubTitle(
+                      AssetString.INFO_DEPARTMENT, assetsModel.departmentName),
+                  GlobalStyles.divider,
+                  _textSubTitle(
+                      AssetString.INFO_YEAR_OF_MANUFACTURE,
+                      assetsModel.yearOfManufacture != "" &&
+                              assetsModel.yearOfManufacture?.isNotEmpty == true
+                          ? DateFormat("dd/ MM/ yyyy").format(
+                              DateTime.parse(assetsModel.yearOfManufacture!))
+                          : ""),
+                  GlobalStyles.divider,
+                  _textSubTitle(AssetString.INFO_PRODUCING_COUNTRY,
+                      assetsModel.producingCountry),
+                  GlobalStyles.divider,
+                  _textSubTitle(
+                      AssetString.INFO_ASSET_GROUP, assetsModel.assetGroupName),
+                  GlobalStyles.divider,
+                  _textSubTitle(
+                      AssetString.INFO_CONTRACT_NAME, assetsModel.contractName),
+                  GlobalStyles.divider,
+                  _textSubTitle(AssetString.INFO_ORIGINAL_PRICE,
+                      assetsModel.originalPrice),
+                  GlobalStyles.divider,
+                  _textSubTitle(AssetString.INFO_STATUS, assetsModel.status),
+                  GlobalStyles.divider,
+                  _textSubTitle(
+                      AssetString.INFO_USER_TIME, assetsModel.usedTime),
+                  GlobalStyles.divider,
+                  _textSubTitle(AssetString.INFO_AMOUNT, assetsModel.amount),
+                  GlobalStyles.divider,
+                  _textSubTitle(AssetString.INFO_PURPOSE_OF_USING,
+                      assetsModel.purposeOfUsing),
+                ],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(CommonString.CANCEL),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   //
   // static Future<dynamic> selectFile() async {
   //   return showDialog(

@@ -4,10 +4,12 @@ import 'package:assets_manager/classes/validators.dart';
 import 'package:assets_manager/component/index.dart';
 import 'package:assets_manager/global_widget/global_widget_index.dart';
 import 'package:assets_manager/models/asset_model.dart';
-import 'package:assets_manager/pages/departmentList.dart';
+import 'package:assets_manager/pages/department_list.dart';
 import 'package:assets_manager/pages/depreciation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import '../global_widget/asset_widget/index.dart';
 
 class AssetConvertPage extends StatefulWidget {
   final bool flag;

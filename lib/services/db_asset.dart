@@ -61,8 +61,7 @@ class DbFirestoreService implements DbApi {
         .map((QuerySnapshot snapshot) {
       List<AssetsModel> _assetsDocs =
           snapshot.docs.map((doc) => AssetsModel.fromDoc(doc)).toList();
-      _assetsDocs
-          .sort((comp1, comp2) => comp1.nameAsset!.compareTo(comp2.nameAsset!));
+      _assetsDocs.sort((comp1, comp2) => comp1.code!.compareTo(comp2.code!));
       return BaseResponse(
           statusCode: HttpStatus.ok,
           status: 0,
@@ -81,8 +80,7 @@ class DbFirestoreService implements DbApi {
         .map((QuerySnapshot snapshot) {
       List<AssetsModel> _assetsDocs =
           snapshot.docs.map((doc) => AssetsModel.fromDoc(doc)).toList();
-      _assetsDocs
-          .sort((comp1, comp2) => comp1.nameAsset!.compareTo(comp2.nameAsset!));
+      _assetsDocs.sort((comp1, comp2) => comp1.code!.compareTo(comp2.code!));
       return BaseResponse(
           statusCode: HttpStatus.ok,
           status: 0,
@@ -99,8 +97,7 @@ class DbFirestoreService implements DbApi {
         .map((QuerySnapshot snapshot) {
       List<AssetsModel> _assetsDocs =
           snapshot.docs.map((doc) => AssetsModel.fromDoc(doc)).toList();
-      _assetsDocs
-          .sort((comp1, comp2) => comp1.nameAsset!.compareTo(comp2.nameAsset!));
+      _assetsDocs.sort((comp1, comp2) => comp1.code!.compareTo(comp2.code!));
       return BaseResponse(
           statusCode: HttpStatus.ok,
           status: 0,
@@ -110,8 +107,7 @@ class DbFirestoreService implements DbApi {
   }
 
   Future<BaseResponse?> addAssets({required AssetsModel assets}) async {
-    final collectionRef =
-        FirebaseFirestore.instance.collection(_collectionAssets);
+    final collectionRef = _firestore.collection(_collectionAssets);
     final querySnapshot =
         await collectionRef.where('code', isEqualTo: assets.code).get();
 
@@ -190,7 +186,6 @@ class DbFirestoreService implements DbApi {
   @override
   Future<BaseResponse?> updateAssetWithTransaction(
       {required AssetsModel assets}) async {
-    String response = DomainProvider.SUCCESS;
     await _firestore.collection(_collectionAssets).doc(assets.documentID).set({
       'nameAsset': assets.nameAsset,
       'code': assets.code,

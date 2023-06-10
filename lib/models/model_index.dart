@@ -1,9 +1,9 @@
 export 'asset_model.dart';
+export 'department_model.dart';
 export 'diary_model.dart';
 export 'history_asset_model.dart';
 export 'hopdong.dart';
 export 'kehoachkiemke.dart';
 export 'nhacungcap.dart';
 export 'nhomtaisan.dart';
-export 'phongban.dart';
 export 'thanhly.dart';

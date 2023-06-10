@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:assets_manager/classes/controlled_countdown.dart';
-import 'package:assets_manager/pages/departmentList.dart';
+import 'package:assets_manager/pages/department_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';

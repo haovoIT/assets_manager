@@ -1,6 +1,6 @@
 import 'package:assets_manager/bloc/kehoachkiemke_edit_bloc.dart';
 import 'package:assets_manager/bloc/kehoachkiemke_edit_bloc_provider.dart';
-import 'package:assets_manager/pages/departmentList.dart';
+import 'package:assets_manager/pages/department_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';

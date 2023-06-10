@@ -4,10 +4,11 @@ import 'package:assets_manager/bloc/department_bloc.dart';
 import 'package:assets_manager/bloc/department_bloc_provider.dart';
 import 'package:assets_manager/bloc/department_edit_bloc.dart';
 import 'package:assets_manager/bloc/department_edit_bloc_provider.dart';
-import 'package:assets_manager/models/phongban.dart';
-import 'package:assets_manager/pages/departmentEditpage.dart';
+import 'package:assets_manager/component/index.dart';
+import 'package:assets_manager/models/department_model.dart';
+import 'package:assets_manager/pages/department_edit_page.dart';
 import 'package:assets_manager/services/db_authentic.dart';
-import 'package:assets_manager/services/db_phongban.dart';
+import 'package:assets_manager/services/db_department.dart';
 import 'package:flutter/material.dart';
 
 class DepartmentsPage extends StatelessWidget {
@@ -63,51 +64,20 @@ class _WarehouseState extends State<Warehouse> {
     _departmentBloc = DepartmentBlocProvider.of(context)?.departmentBloc;
   }
 
-  void _addorEditDepartment(
-      {required bool add, required Department department}) {
+  void _addOrEditDepartment(
+      {required bool add, required DepartmentModel department}) {
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (BuildContext context) => DepartmentEditBlocProvider(
                 departmentEditBloc:
                     DepartmentEditBloc(add, DbDepartmentService(), department),
-                child: DepartmentEditPage(),
+                child: DepartmentEditPage(
+                  flag: add,
+                ),
               ),
           fullscreenDialog: true),
     );
-  }
-
-  Future<bool> _confirmDeleteDepartment(String namePB) async {
-    return await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(
-              "Xóa Phòng Ban",
-              style: TextStyle(
-                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            content: Text(
-                'Bạn có chắc chắn muốn xóa phòng ban ' + namePB + ' không ?',
-                style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic)),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  child: Text('Huỷ')),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: Text(
-                    'Tiếp tục',
-                    style: TextStyle(color: Colors.red),
-                  ))
-            ],
-          );
-        });
   }
 
   @override
@@ -124,7 +94,7 @@ class _WarehouseState extends State<Warehouse> {
                 child: CircularProgressIndicator(),
               );
             } else if (snapshot.hasData) {
-              return _buildListViewSeparated(snapshot);
+              return _buildListViewSeparated(snapshot.data.data);
             } else {
               return Center(
                 child: Container(
@@ -136,25 +106,21 @@ class _WarehouseState extends State<Warehouse> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          _addorEditDepartment(add: true, department: Department());
+          _addOrEditDepartment(add: true, department: DepartmentModel());
         },
         icon: Icon(Icons.add),
-        label: Text('Phòng Ban'),
+        label: Text(DepartmentString.DEPARTMENT),
       ),
     );
   }
 
-  Widget _buildListViewSeparated(AsyncSnapshot snapshot) {
+  Widget _buildListViewSeparated(data) {
     return ListView.separated(
-      itemCount: snapshot.data.length,
+      itemCount: data.length,
       itemBuilder: (BuildContext context, int index) {
-        String _title = snapshot.data[index].Ten_Pb;
-        String _subTitle = 'Số điện thoại: ' +
-            snapshot.data[index].SDT +
-            '\nĐịa Chỉ: ' +
-            snapshot.data[index].DC;
+        final DepartmentModel item = data[index];
         return Dismissible(
-          key: Key(snapshot.data[index].documentID),
+          key: Key(data[index].documentID),
           background: Container(
             color: Colors.red,
             alignment: Alignment.centerLeft,
@@ -173,47 +139,93 @@ class _WarehouseState extends State<Warehouse> {
               color: Colors.white,
             ),
           ),
-          child: ListTile(
-            tileColor: index % 2 == 0 ? Colors.green.shade50 : Colors.white,
-            leading: Text(
-              (index + 1).toString(),
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0,
-                  color: Colors.lightBlue),
+          child: Padding(
+            padding: GlobalStyles.paddingPageLeftRight,
+            child: ListTile(
+              contentPadding: GlobalStyles.paddingAll,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: AppColors.main)),
+              tileColor: index % 2 == 0 ? Colors.green.shade50 : Colors.white,
+              leading: Text(
+                (index + 1).toString(),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24.0,
+                    color: Colors.lightBlue),
+              ),
+              title: _itemTitle(item.code ?? ""),
+              subtitle: _itemSubTitle(item: item),
+              onTap: () {
+                _addOrEditDepartment(add: false, department: data[index]);
+              },
             ),
-            title: Text(
-              _title,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0,
-                  color: Colors.blue),
-            ),
-            subtitle: Text(_subTitle),
-            onTap: () {
-              _addorEditDepartment(
-                  add: false,
-                  department: Department(
-                      documentID: snapshot.data[index].documentID,
-                      Ten_Pb: snapshot.data[index].Ten_Pb,
-                      SDT: snapshot.data[index].SDT,
-                      DC: snapshot.data[index].DC));
-            },
           ),
           confirmDismiss: (direction) async {
-            bool confirmDelete = await _confirmDeleteDepartment(_title);
+            bool confirmDelete = await await Alert.showConfirm(context,
+                title: DepartmentString.TITLE_CONFIRM_DELETE,
+                detail: DepartmentString.DETAIL_CONFIRM_DELETE,
+                btTextTrue: CommonString.CONTINUE,
+                btTextFalse: CommonString.CANCEL);
             if (confirmDelete) {
-              _departmentBloc?.deleteDepartment.add(snapshot.data[index]);
+              _departmentBloc?.deleteDepartment.add(data[index]);
             }
-            return null;
           },
         );
       },
       separatorBuilder: (BuildContext context, int index) {
-        return Divider(
-          color: Colors.green,
-        );
+        return GlobalStyles.sizedBoxHeight;
       },
+    );
+  }
+
+  Widget _itemTitle(String _title) {
+    return Text(
+      _title,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 24.0,
+        color: AppColors.main,
+      ),
+    );
+  }
+
+  Widget _itemSubTitle({
+    required DepartmentModel item,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _textSubTitle(DepartmentString.NAME, item.name),
+        GlobalStyles.divider,
+        _textSubTitle(DepartmentString.PHONE, item.phone),
+        GlobalStyles.divider,
+        _textSubTitle(DepartmentString.ADDRESS, item.address ?? ""),
+      ],
+    );
+  }
+
+  Widget _textSubTitle(_titleDetail, _subtitleDetail) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            _titleDetail,
+            style: TextStyle(fontSize: 16, color: AppColors.black),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            _subtitleDetail ?? "",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
+            ),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -22,6 +22,10 @@ abstract class MassageDbString {
   static const String ADD_ASSET_SUCCESS = "Thêm Tài Sản Thành Công";
   static const String ADD_ASSET_ERROR = "Thêm Tài Sản Thất Bại";
   static const String ADD_ASSET_ERROR_DUPLICATE = "Mã Tài Sản Đã Tồn Tại";
+  static const String ADD_DEPARTMENT_SUCCESS = "Thêm Phòng Ban Thành Công";
+  static const String ADD_DEPARTMENT_ERROR = "Thêm Phòng Ban Thất Bại";
+  static const String ADD_DEPARTMENT_ERROR_DUPLICATE =
+      "Mã Phòng Ban Đã Tồn Tại";
   static const String ADD_DIARY_SUCCESS = "Thêm Khấu Hao Thành Công";
   static const String ADD_DIARY_ERROR = "Thêm Khấu Hao Thất Bại";
   static const String ADD_HISTORY_ASSET_SUCCESS =
@@ -33,6 +37,10 @@ abstract class MassageDbString {
   static const String GET_LIST_ASSET_SUCCESS =
       "Lấy Danh Sách Tài Sản Thành Công";
   static const String GET_LIST_ASSET_ERROR = "Lấy Danh Sách Tài Sản Thất Bại";
+  static const String GET_LIST_DEPARTMENT_SUCCESS =
+      "Lấy Danh Sách Phòng Ban Thành Công";
+  static const String GET_LIST_DEPARTMENT_ERROR =
+      "Lấy Danh Sách Phòng Ban Thất Bại";
   static const String GET_LIST_DIARY_SUCCESS =
       "Lấy Danh Sách Khấu Hao Thành Công";
   static const String GET_LIST_DIARY_ERROR = "Lấy Danh Sách Khấu Hao Thất Bại";
@@ -42,10 +50,15 @@ abstract class MassageDbString {
       "Lấy Danh Sách Lịch Sử Tài Sản Thất Bại";
   static const String UPDATE_ASSET_SUCCESS = "Cập Nhật Tài Sản Thành Công";
   static const String UPDATE_ASSET_ERROR = "Cập Nhật Tài Sản Thất Bại";
+  static const String UPDATE_DEPARTMENT_SUCCESS =
+      "Cập Nhật Phòng Ban Thành Công";
+  static const String UPDATE_DEPARTMENT_ERROR = "Cập Nhật Phòng Ban Thất Bại";
   static const String UPDATE_DIARY_SUCCESS = "Cập Nhật Khấu Hao Thành Công";
   static const String UPDATE_DIARY_ERROR = "Cập Nhật Khấu Hao Thất Bại";
   static const String DELETE_ASSET_SUCCESS = "Xóa Tài Sản Thành Công";
   static const String DELETE_ASSET_ERROR = "Xóa Tài Sản Thất Bại";
+  static const String DELETE_DEPARTMENT_SUCCESS = "Xóa Phòng Ban Thành Công";
+  static const String DELETE_DEPARTMENT_ERROR = "Xóa Phòng Ban Thất Bại";
   static const String DELETE_DIARY_SUCCESS = "Xóa Khấu Hao Thành Công";
   static const String DELETE_DIARY_ERROR = "Xóa Khấu Hao Thất Bại";
 }
@@ -86,6 +99,7 @@ abstract class HomeString {
 
 abstract class AssetString {
   static const String TITLE = "QUẢN LÝ TÀI SẢN";
+  static const String INFO_TITLE = "Thẻ Thông Tin Tài sản";
   static const String EDIT_TITLE = "Thông Tin Tài sản";
   static const String CONVERT_TITLE = "Chuyển Đổi Tài sản";
   static const String HISTORY_TITLE = "Lịch Sử Sử Dụng";
@@ -143,7 +157,6 @@ abstract class AssetString {
   static const String REQUIRE_STATUS = " Vui lòng chọn Tình Trạng ";
   static const String REQUIRE_PURPOSE_OF_USING =
       " Vui lòng nhập Mục đích sử dụng";
-
   static const String SUCCESS_MASSAGE = "Thêm tài sản thành công.";
   static const String ERROR_MASSAGE = "Thêm tài sản thất bại.";
   static const String CONVERT_ASSET = "Chuyển tài sản";
@@ -179,10 +192,9 @@ abstract class AssetString {
   static const String TITLE_HISTORY = "Lịch Sử Sử Dụng";
   static const String CONTENT_CONFIRM_TITLE_HISTORY =
       "Bạn có muốn xem lịch sử sử dụng không?.";
-  static const String CONFIRM_TITLE_DELETE = "Xóa Tài Sản";
-  static const String CONTENT_CONFIRM_TITLE_DELETE =
+  static const String TITLE_CONFIRM_DELETE = "Xóa Tài Sản";
+  static const String DETAIL_CONFIRM_DELETE =
       "Bạn có chắc chắn muốn xóa tài sản không?";
-
   static const String INFO_NAME_ASSETS = "Tên Tài sản";
   static const String INFO_DEPARTMENT = "Phòng Ban";
   static const String INFO_YEAR_OF_MANUFACTURE = "Năm SX";
@@ -210,6 +222,35 @@ abstract class AssetString {
   static const String BUTTON_TEXT_UPDATE_ASSET = 'Nâng Cấp Tài Sản';
   static const String BUTTON_TEXT_LIQUIDATION = 'Xác Nhận Thanh Lý';
   static const String BUTTON_TEXT_CONTINUE = 'Tiếp Tục';
+}
+
+abstract class DepartmentString {
+  static const String TITLE_LIST_PAGE = "Danh Sách Phòng Ban";
+  static const String EDIT_TITLE = "Thông Tin Phòng Ban";
+  static const String DEPARTMENT = "Phòng Ban";
+  static const String HINT_NAME_SEARCH = "Nhập tên phòng ban....";
+  static const String NAME = "Tên phòng ban: ";
+  static const String PHONE = "Số điện thoại: ";
+  static const String ADDRESS = "Địa Chỉ: ";
+  static const String TITLE_CONFIRM_DELETE = "Xóa Phòng Ban";
+  static const String DETAIL_CONFIRM_DELETE =
+      "Bạn có chắc chắn muốn xóa phòng ban không?";
+
+  static const String LABEL_TEXT_NAME = "Tên Phòng Ban";
+  static const String LABEL_TEXT_CODE = "Mã Phòng Ban";
+  static const String LABEL_TEXT_PHONE = "Số Điện Thoại";
+  static const String LABEL_TEXT_ADDRESS = "Địa Chỉ";
+  static const String REQUIRE_NAME = " Vui lòng nhập Tên Phòng Ban";
+  static const String REQUIRE_CODE = " Vui lòng nhập Mã Phòng Ban";
+  static const String REQUIRE_PHONE = " Vui lòng nhập Số điện thoại";
+  static const String REQUIRE_ADDRESS = " Vui lòng nhập Địa chỉ";
+  static const String REQUIRE_PHONE_VALID = "Số điện thoại không đúng";
+
+  static const String SUCCESS_MASSAGE = "Thêm Phòng Ban thành công.";
+  static const String ERROR_MASSAGE = "Thêm Phòng Ban thất bại.";
+
+  static const String UPDATE_SUCCESS_MASSAGE = "Cập nhật Phòng Ban thành công.";
+  static const String UPDATE_ERROR_MASSAGE = "Cập nhật Phòng Ban thất bại.";
 }
 
 abstract class AppString {

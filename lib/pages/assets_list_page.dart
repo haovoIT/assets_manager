@@ -2,10 +2,11 @@ import 'package:assets_manager/bloc/authentication_bloc.dart';
 import 'package:assets_manager/bloc/authentication_bloc_provider.dart';
 import 'package:assets_manager/bloc/home_bloc.dart';
 import 'package:assets_manager/bloc/home_bloc_provider.dart';
+import 'package:assets_manager/component/index.dart';
+import 'package:assets_manager/models/asset_model.dart';
 import 'package:assets_manager/services/db_asset.dart';
 import 'package:assets_manager/services/db_authentic.dart';
 import 'package:assets_manager/services/db_history_asset.dart';
-import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -85,7 +86,7 @@ class _AssetsPageListsState extends State<AssetsPageLists> {
                 child: CircularProgressIndicator(),
               );
             } else if (snapshot.hasData) {
-              return _buildListViewSeparated(snapshot);
+              return _buildListViewSeparated(snapshot.data?.data);
             } else {
               return Center(
                 child: Container(
@@ -97,122 +98,30 @@ class _AssetsPageListsState extends State<AssetsPageLists> {
     );
   }
 
-  Widget _buildListViewSeparated(AsyncSnapshot snapshot) {
+  Widget _buildListViewSeparated(data) {
     return ListView.separated(
-        itemCount: snapshot.data.length,
+        itemCount: data.length,
         itemBuilder: (BuildContext context, int index) {
-          String _title = snapshot.data[index].Ten_ts;
-          String _subtilte = "NSX: " +
-              DateFormat('dd/MM/yyyy')
-                  .format(DateTime.parse(snapshot.data[index].Nam_sx)) +
-              "\nTình Trạng: " +
-              snapshot.data[index].Tinh_trang;
+          final AssetsModel item = data[index];
           return Card(
-            child: ListTile(
-              tileColor: index % 2 == 0 ? Colors.green.shade50 : Colors.white,
-              leading: Image.asset(
-                "assets/images/img.png",
-              )
-              /*Column(
-                children: <Widget>[
-                  Text(
-                    snapshot.data[index].Ma_nts,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
-                        color: Colors.lightBlue),
-                  ),
-                  Text(snapshot.data[index].Ma_pb)
-                ],
-              )*/
-              ,
-              title: Text(
-                _title,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24.0,
-                    color: Colors.blue),
+            child: Padding(
+              padding: GlobalStyles.paddingPageLeftRight,
+              child: ListTile(
+                contentPadding: GlobalStyles.paddingAll,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: AppColors.main)),
+                tileColor: index % 2 == 0 ? Colors.green.shade50 : Colors.white,
+                leading: Image.asset(
+                  "assets/images/img.png",
+                ),
+                title: _itemTitle(item.code ?? ""),
+                subtitle: _itemSubTitle(item: item),
+                onTap: () => Alert.showInfoAsset(
+                    title: AssetString.INFO_TITLE,
+                    assetsModel: item,
+                    context: context),
               ),
-              subtitle: Text(_subtilte),
-              onTap: () {
-                final TextStyle textStyle =
-                    TextStyle(fontSize: 16.0, color: Colors.blue.shade500);
-                String _title = snapshot.data[index].Ten_ts;
-                String _subtilte = snapshot.data[index].Ten_pb;
-                String _namsx = DateFormat.yMd()
-                    .format(DateTime.parse(snapshot.data[index].Nam_sx));
-                String _nuocsx = snapshot.data[index].Nuoc_sx;
-                String _nts = snapshot.data[index].Ten_nts;
-                String _tt = snapshot.data[index].Tinh_trang;
-                String _ng = snapshot.data[index].Nguyen_gia;
-                String _tg = snapshot.data[index].Tg_sd;
-                String _sl = snapshot.data[index].So_luong;
-                String _hd = snapshot.data[index].Ten_hd;
-                String _md = snapshot.data[index].Mdsd;
-                String _qr = snapshot.data[index].Ma_qr;
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text(
-                          'Thẻ Tài Sản Chi Tiết',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue),
-                        ),
-                        content: SingleChildScrollView(
-                          child: Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                BarcodeWidget(
-                                  data: _qr,
-                                  barcode: Barcode.qrCode(),
-                                  width: 200,
-                                  height: 200,
-                                  color: Colors.black,
-                                  backgroundColor: Colors.white,
-                                  padding: EdgeInsets.only(left: 40.0),
-                                ),
-                                Divider(
-                                  color: Colors.green,
-                                ),
-                                Text("Tên tài sản: " + _title,
-                                    style: textStyle),
-                                Text("Phòng Ban: " + _subtilte,
-                                    style: textStyle),
-                                Text("Năm Sản Xuất: " + _namsx,
-                                    style: textStyle),
-                                Text("Nước Sản Xuất: " + _nuocsx,
-                                    style: textStyle),
-                                Text("Nhóm Tài Sản: " + _nts, style: textStyle),
-                                Text("Tình Trạng: " + _tt, style: textStyle),
-                                Text("Nguyên Giá: " + _ng, style: textStyle),
-                                Text("Thời Gian SD: " + _tg, style: textStyle),
-                                Text("Số Lượng: " + _sl, style: textStyle),
-                                Text("Hợp Đồng: " + _hd, style: textStyle),
-                                Text("Mục Đích SD: " + _md,
-                                    textAlign: TextAlign.start,
-                                    style: textStyle),
-                              ],
-                            ),
-                          ),
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            child: const Text('Huỷ'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    });
-              },
             ),
           );
         },
@@ -221,5 +130,69 @@ class _AssetsPageListsState extends State<AssetsPageLists> {
             color: Colors.white,
           );
         });
+  }
+
+  Widget _itemTitle(String _title) {
+    return Text(
+      _title,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 24.0,
+        color: AppColors.main,
+      ),
+    );
+  }
+
+  Widget _itemSubTitle({
+    required AssetsModel item,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _textSubTitle(AssetString.INFO_NAME_ASSETS, item.nameAsset),
+        GlobalStyles.divider,
+        _textSubTitle(AssetString.DEPARTMENTS, item.departmentName),
+        GlobalStyles.divider,
+        _textSubTitle(AssetString.STATUS, item.status ?? ""),
+        GlobalStyles.divider,
+        _textSubTitle(
+            AssetString.START_DATE,
+            item.starDate != "" && item.starDate?.isNotEmpty == true
+                ? DateFormat("dd/ MM/ yyyy")
+                    .format(DateTime.parse(item.starDate!))
+                : ""),
+        GlobalStyles.divider,
+        _textSubTitle(
+            AssetString.END_DATE,
+            item.endDate != "" && item.endDate?.isNotEmpty == true
+                ? DateFormat("dd/ MM/ yyyy")
+                    .format(DateTime.parse(item.endDate!))
+                : ""),
+      ],
+    );
+  }
+
+  Widget _textSubTitle(_titleDetail, _subtitleDetail) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            _titleDetail,
+            style: TextStyle(fontSize: 16, color: AppColors.black),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            _subtitleDetail ?? "",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
+            ),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
+    );
   }
 }
