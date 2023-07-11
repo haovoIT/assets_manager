@@ -1,6 +1,5 @@
 import 'package:assets_manager/component/index.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class CustomTextFromField extends StatelessWidget {
   CustomTextFromField(
@@ -13,7 +12,6 @@ class CustomTextFromField extends StatelessWidget {
       this.inputAction,
       this.validator,
       this.onChangeFunction,
-      this.inputFormatCustom,
       this.maxLengthText,
       this.label,
       this.prefixIcon,
@@ -32,7 +30,6 @@ class CustomTextFromField extends StatelessWidget {
   final TextInputAction? inputAction;
   final String? Function(String?)? validator;
   final Function(String)? onChangeFunction;
-  final FilteringTextInputFormatter? inputFormatCustom;
   final int? maxLengthText;
   final prefixIcon;
   final textCapitalization;
@@ -46,9 +43,6 @@ class CustomTextFromField extends StatelessWidget {
       controller: controller,
       textCapitalization: textCapitalization ?? TextCapitalization.words,
       style: GlobalStyles.textStyleTextFormField,
-      inputFormatters: [
-        inputFormatCustom ?? FilteringTextInputFormatter.singleLineFormatter
-      ],
       textAlign: TextAlign.start,
       maxLines: maxLines ?? 1,
       maxLength: maxLengthText ?? null,

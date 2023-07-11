@@ -1,6 +1,6 @@
 import 'package:assets_manager/bloc/assets_edit_bloc.dart';
 import 'package:assets_manager/component/index.dart';
-import 'package:assets_manager/pages/contractList.dart';
+import 'package:assets_manager/pages/contract_list_page.dart';
 import 'package:flutter/material.dart';
 
 class ChooseContractName extends StatelessWidget {
@@ -17,13 +17,15 @@ class ChooseContractName extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        final String contractName = await Navigator.push(
+        final String? contractName = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ContractList(),
           ),
         );
-        assetsEditBloc?.contractNameEditChanged.add(contractName);
+        if (contractName != null && contractName.isNotEmpty == true) {
+          assetsEditBloc?.contractNameEditChanged.add(contractName ?? "");
+        }
       },
       child: Container(
         height: 60,
@@ -42,9 +44,6 @@ class ChooseContractName extends StatelessWidget {
             }
             contractNameController.value =
                 contractNameController.value.copyWith(text: snapshot.data);
-            /*if (_contractNameController.text.length > 1) {
-              hd = false;
-            }*/
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -62,11 +61,7 @@ class ChooseContractName extends StatelessWidget {
                     GlobalStyles.iconArrowDropDown,
                   ],
                 ),
-                Text(
-                    /*hd
-                      ? '$tenHD'
-                      : */
-                    contractNameController.text.toString(),
+                Text(contractNameController.text.toString(),
                     style: GlobalStyles.textStyleTextFormField)
               ],
             );

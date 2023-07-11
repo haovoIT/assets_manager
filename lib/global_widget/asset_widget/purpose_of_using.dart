@@ -25,8 +25,8 @@ class PurposeOfUsing extends StatelessWidget {
             purposeOfUsingController.value.copyWith(text: snapshot.data);
         return CustomTextFromField(
           maxLines: 5,
-          inputType: TextInputType.text,
-          inputAction: TextInputAction.done,
+          inputType: TextInputType.multiline,
+          inputAction: TextInputAction.newline,
           controller: purposeOfUsingController,
           labelText: AssetString.PURPOSE_OF_USING,
           prefixIcon: Icons.assignment_outlined,

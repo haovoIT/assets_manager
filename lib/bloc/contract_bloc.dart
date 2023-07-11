@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:assets_manager/models/hopdong.dart';
+import 'package:assets_manager/models/base_response.dart';
+import 'package:assets_manager/models/contract_model.dart';
 import 'package:assets_manager/services/db_authentic_api.dart';
-import 'package:assets_manager/services/db_hopdong_api.dart';
+import 'package:assets_manager/services/db_contract_api.dart';
 
 class ContractBloc {
   final DbCtApi dbCtApi;
@@ -12,10 +13,10 @@ class ContractBloc {
     _startListeners();
   }
 
-  final StreamController<List<Contract>> _contractController =
-      StreamController<List<Contract>>.broadcast();
-  Sink<List<Contract>> get _addListContract => _contractController.sink;
-  Stream<List<Contract>> get listContract => _contractController.stream;
+  final StreamController<BaseResponse> _contractController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get _addListContract => _contractController.sink;
+  Stream<BaseResponse> get listContract => _contractController.stream;
 
   final StreamController<Contract> _contractDeleteController =
       StreamController<Contract>.broadcast();
@@ -23,7 +24,7 @@ class ContractBloc {
 
   void _startListeners() {
     dbCtApi.getContractList().listen((contractDocs) {
-      _addListContract.add(contractDocs);
+      _addListContract.add(contractDocs!);
     });
     _contractDeleteController.stream.listen((contract) {
       dbCtApi.deleteContract(contract);
