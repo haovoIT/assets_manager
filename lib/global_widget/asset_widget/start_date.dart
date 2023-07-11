@@ -11,22 +11,13 @@ class StartDate extends StatelessWidget {
     required this.flagStartDate,
     required this.userTime,
     required this.startDateController,
-    /*this.sinkDepreciation,
-    this.numberMonths,
-    this.originalPrice,
-    this.accumulatedDouble,*/
   }) : super(key: key);
   bool flagStartDate;
   int userTime;
   final Stream<String>? stream;
   final Sink<String>? sinkStartDate;
   final Sink<String>? sinkEndDate;
-  //final Sink<String>? sinkDepreciation;
   final TextEditingController startDateController;
-
-  // final int? numberMonths;
-  // final String? originalPrice;
-  // final double? accumulatedDouble;
 
   @override
   Widget build(BuildContext context) {
@@ -64,13 +55,6 @@ class StartDate extends StatelessWidget {
                 sinkStartDate?.add(_pickerDate);
                 final endDate = Alert.addMonth(userTime, _pickerDate);
                 sinkEndDate?.add(endDate);
-                // final depreciationDouble = Alert.onChangeDepreciation(
-                //   userTimeInt: userTime,
-                //   numberMonths: numberMonths,
-                //   originalPrice: originalPrice,
-                //   accumulatedDouble: accumulatedDouble,
-                // );
-                // sinkDepreciation?.add(depreciationDouble.toInt().toVND());
               }
             },
             child: Row(

@@ -25,8 +25,8 @@ class AddressWidget extends StatelessWidget {
         controller.value = controller.value.copyWith(text: snapshot.data);
         return CustomTextFromField(
           maxLines: 5,
-          inputType: TextInputType.text,
-          inputAction: TextInputAction.done,
+          inputType: TextInputType.multiline,
+          inputAction: TextInputAction.newline,
           controller: controller,
           labelText: DepartmentString.LABEL_TEXT_ADDRESS,
           prefixIcon: Icons.assignment_outlined,

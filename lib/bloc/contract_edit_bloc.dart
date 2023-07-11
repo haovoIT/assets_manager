@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:assets_manager/models/hopdong.dart';
-import 'package:assets_manager/services/db_hopdong_api.dart';
+import 'package:assets_manager/models/base_response.dart';
+import 'package:assets_manager/models/contract_model.dart';
+import 'package:assets_manager/services/db_contract_api.dart';
 
 class ContractEditBloc {
   final DbCtApi dbCtApi;
@@ -16,62 +17,67 @@ class ContractEditBloc {
     _startEditListeners().then((finished) => _getContract(add, selectContract));
   }
 
-  final StreamController<String> _soHDController =
+  final StreamController<String> _numberContractController =
       StreamController<String>.broadcast();
-  Sink<String> get soHDEditChanged => _soHDController.sink;
-  Stream<String> get soHDEdit => _soHDController.stream;
+  Sink<String> get numberContractEditChanged => _numberContractController.sink;
+  Stream<String> get numberContractEdit => _numberContractController.stream;
 
-  final StreamController<String> _tenHDController =
+  final StreamController<String> _nameController =
       StreamController<String>.broadcast();
-  Sink<String> get tenHDEditChanged => _tenHDController.sink;
-  Stream<String> get tenHDEdit => _tenHDController.stream;
+  Sink<String> get nameEditChanged => _nameController.sink;
+  Stream<String> get nameEdit => _nameController.stream;
 
-  final StreamController<String> _ngayKyController =
+  final StreamController<String> _signingDateController =
       StreamController<String>.broadcast();
-  Sink<String> get ngayKyEditChanged => _ngayKyController.sink;
-  Stream<String> get ngayKyEdit => _ngayKyController.stream;
+  Sink<String> get signingDateEditChanged => _signingDateController.sink;
+  Stream<String> get signingDateEdit => _signingDateController.stream;
 
-  final StreamController<String> _nHHController =
+  final StreamController<String> _expirationDateController =
       StreamController<String>.broadcast();
-  Sink<String> get nHHEditChanged => _nHHController.sink;
-  Stream<String> get nHHEdit => _nHHController.stream;
+  Sink<String> get expirationDateEditChanged => _expirationDateController.sink;
+  Stream<String> get expirationDateEdit => _expirationDateController.stream;
 
-  final StreamController<String> _nCCController =
+  final StreamController<String> _nameSupplierController =
       StreamController<String>.broadcast();
-  Sink<String> get nCCEditChanged => _nCCController.sink;
-  Stream<String> get nCCEdit => _nCCController.stream;
+  Sink<String> get nameSupplierEditChanged => _nameSupplierController.sink;
+  Stream<String> get nameSupplierEdit => _nameSupplierController.stream;
 
-  final StreamController<String> _ndController =
+  final StreamController<String> _detailController =
       StreamController<String>.broadcast();
-  Sink<String> get ndEditChanged => _ndController.sink;
-  Stream<String> get ndEdit => _ndController.stream;
+  Sink<String> get detailEditChanged => _detailController.sink;
+  Stream<String> get detailEdit => _detailController.stream;
 
   final StreamController<String> _saveController =
       StreamController<String>.broadcast();
   Sink<String> get saveEditChanged => _saveController.sink;
   Stream<String> get saveEdit => _saveController.stream;
 
+  final StreamController<BaseResponse> _responseController =
+      StreamController<BaseResponse>.broadcast();
+  Sink<BaseResponse> get responseEditChanged => _responseController.sink;
+  Stream<BaseResponse> get responseEdit => _responseController.stream;
+
   _startEditListeners() async {
-    _soHDController.stream.listen((soHD) {
-      selectContract.SoHD = soHD;
+    _numberContractController.stream.listen((numberContract) {
+      selectContract.numberContract = numberContract;
     });
-    _tenHDController.stream.listen((tenHD) {
-      selectContract.TenHD = tenHD;
+    _nameController.stream.listen((name) {
+      selectContract.name = name;
     });
-    _ngayKyController.stream.listen((ngayKy) {
-      selectContract.NgayKy = ngayKy;
-    });
-
-    _nHHController.stream.listen((nHH) {
-      selectContract.NHH = nHH;
+    _signingDateController.stream.listen((signingDate) {
+      selectContract.signingDate = signingDate;
     });
 
-    _nCCController.stream.listen((nCC) {
-      selectContract.NCC = nCC;
+    _expirationDateController.stream.listen((expirationDate) {
+      selectContract.expirationDate = expirationDate;
     });
 
-    _ndController.stream.listen((nd) {
-      selectContract.ND = nd;
+    _nameSupplierController.stream.listen((nameSupplier) {
+      selectContract.nameSupplier = nameSupplier;
+    });
+
+    _detailController.stream.listen((detail) {
+      selectContract.detail = detail;
     });
     _saveController.stream.listen((action) {
       if (action == "Save") {
@@ -83,48 +89,57 @@ class ContractEditBloc {
   void _getContract(bool add, Contract contract) {
     if (add) {
       selectContract = Contract();
-      selectContract.SoHD = '';
-      selectContract.TenHD = '';
-      selectContract.NgayKy = DateTime.now().toString();
-      selectContract.NHH = DateTime.now().toString();
-      selectContract.NCC = '';
-      selectContract.ND = '';
+      selectContract.numberContract = '';
+      selectContract.name = '';
+      selectContract.signingDate = DateTime.now().toString();
+      selectContract.expirationDate = DateTime.now().toString();
+      selectContract.nameSupplier = '';
+      selectContract.detail = '';
     } else {
-      selectContract.SoHD = contract.SoHD;
-      selectContract.TenHD = contract.TenHD;
-      selectContract.NgayKy = contract.NgayKy;
-      selectContract.NHH = contract.NHH;
-      selectContract.NCC = contract.NCC;
-      selectContract.ND = contract.ND;
+      selectContract.numberContract = contract.numberContract;
+      selectContract.name = contract.name;
+      selectContract.signingDate = contract.signingDate;
+      selectContract.expirationDate = contract.expirationDate;
+      selectContract.nameSupplier = contract.nameSupplier;
+      selectContract.detail = contract.detail;
     }
-    soHDEditChanged.add(selectContract.SoHD ?? "");
-    tenHDEditChanged.add(selectContract.TenHD ?? "");
-    ngayKyEditChanged.add(selectContract.NgayKy ?? "");
-    nHHEditChanged.add(selectContract.NHH ?? "");
-    nCCEditChanged.add(selectContract.NCC ?? "");
-    ndEditChanged.add(selectContract.ND ?? "");
+    numberContractEditChanged.add(selectContract.numberContract ?? "");
+    nameEditChanged.add(selectContract.name ?? "");
+    signingDateEditChanged.add(selectContract.signingDate ?? "");
+    expirationDateEditChanged.add(selectContract.expirationDate ?? "");
+    nameSupplierEditChanged.add(selectContract.nameSupplier ?? "");
+    detailEditChanged.add(selectContract.detail ?? "");
   }
 
-  void _saveContract() {
+  void _saveContract() async {
     Contract contract = Contract(
       documentID: selectContract.documentID,
-      SoHD: selectContract.SoHD,
-      TenHD: selectContract.TenHD,
-      NgayKy: selectContract.NgayKy,
-      NHH: selectContract.NHH,
-      NCC: selectContract.NCC,
-      ND: selectContract.ND,
+      numberContract: selectContract.numberContract,
+      name: selectContract.name,
+      signingDate: selectContract.signingDate,
+      expirationDate: selectContract.expirationDate,
+      nameSupplier: selectContract.nameSupplier,
+      detail: selectContract.detail,
     );
     add ? dbCtApi.addContract(contract) : dbCtApi.updateContract(contract);
+
+    if (add) {
+      final response = await dbCtApi.addContract(contract);
+      responseEditChanged.add(response!);
+    } else {
+      final response = await dbCtApi.updateContract(contract);
+      responseEditChanged.add(response!);
+    }
   }
 
   void dispose() {
-    _soHDController.close();
-    _tenHDController.close();
-    _ngayKyController.close();
-    _nHHController.close();
-    _nCCController.close();
-    _ndController.close();
+    _numberContractController.close();
+    _nameController.close();
+    _signingDateController.close();
+    _expirationDateController.close();
+    _nameSupplierController.close();
+    _detailController.close();
     _saveController.close();
+    _responseController.close();
   }
 }
